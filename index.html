@@ -24,7 +24,7 @@
       </div>
       <div class="header-actions">
         <button type="button" id="btn-new-visitor" class="btn-header-secondary">
-          دخول كمستخدم جديد
+          استبيان جديد لشخص آخر
         </button>
         <a class="link-out" href="https://uqu.edu.sa/App/Degrees" target="_blank" rel="noopener"
           >برامج الجامعة الرسمية</a
@@ -37,12 +37,18 @@
       <span class="progress-label">خطوات التوجيه</span>
     </div>
 
+    <aside id="track-feed-panel" class="track-feed-panel hidden" aria-hidden="true">
+      <div class="track-feed-inner">
+        <p class="track-feed-title">آخر النتائج (الأعلى نسبة)</p>
+        <div id="track-feed-list" class="track-feed-list"></div>
+      </div>
+    </aside>
+
     <main class="shell">
       <section id="panel-register" class="panel card">
         <h2>1 — بياناتك</h2>
         <p class="lead">
-          قبل الاستبيان نسجّل اسمك وبريدك. تُحفظ خطواتك والإجابات في
-          <strong>جلسة المتصفح</strong> (sessionStorage) لتفادي فقدان التقدم عند التحديث؛ زر «جلسة جديدة» يمسحها.
+          أدخل اسمك وبريدك للمتابعة. إن أغلقت الصفحة ثم عدت قبل إنهاء الاستبيان، يمكنك مواصلة التقدم على نفس الجهاز.
         </p>
         <form id="form-register" class="form-grid" novalidate autocomplete="off">
           <label class="field">
@@ -77,7 +83,7 @@
         <h2>3 — قياس المستوى والميول</h2>
         <p class="lead">
           أجب بصدق؛ النتيجة تقترح أفضل ثلاثة تخصصات من برامج البكالوريوس في أم القرى مع تقدير راتب سوقي
-          <strong>غير ملزم</strong>. نوع الأسئلة وما إذا كنا نستبعد البرامج الشديدة علمياً يُشتقّان <strong>تلقائياً من مسار الثانوي</strong> الذي اخترته (إدارة أعمال / شرعي = إداري-أدبي في النموذج؛ حاسب-هندسة / صحة = علمي؛ عام = مختلط).
+          <strong>غير ملزم</strong>. تتغيّر الأسئلة والاقتراحات بحسب مسار الثانوي الذي اخترته.
         </p>
         <div id="questions"></div>
         <button type="button" id="btn-survey-submit" class="btn primary wide">عرض النتائج</button>
@@ -105,12 +111,7 @@
     </main>
 
     <footer class="site-footer">
-      <p id="visitor-session-hint" class="session-hint" aria-live="polite"></p>
-      <p>مشروع توجيه طلابي — بيانات السجل: <code>REGISTRY_AND_ID_SYSTEM</code> في <code>data/registry-bundle.js</code></p>
-      <p class="muted tiny">
-        كل جهاز أو متصفح له جلسة مستقلة. لشخص آخر على <strong>نفس الهاتف/الكمبيوتر</strong> اضغط «دخول كمستخدم جديد» أو افتح
-        الرابط مع <code>?new=1</code>
-      </p>
+      <p class="muted tiny">مشروع توجيه طلابي — جامعة أم القرى</p>
     </footer>
 
     <script src="data/registry-bundle.js"></script>

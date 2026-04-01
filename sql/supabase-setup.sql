@@ -88,3 +88,34 @@ as $$
 $$;
 
 grant execute on function public.major_popularity_stats() to anon, authenticated;
+
+-- شريط النشاط بصفحة المسار: الاسم + التخصص صاحب المركز الأول (major_rank_1) فقط
+create or replace function public.track_feed_recent(limit_n int default 15)
+returns json
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (
+      select json_agg(
+        json_build_object(
+          'at', s.created_at,
+          'name', s.name,
+          'major_id', s.major_rank_1
+        )
+        order by s.created_at desc
+      )
+      from (
+        select created_at, name, major_rank_1
+        from public.orientation_submissions
+        where major_rank_1 is not null and btrim(major_rank_1) <> ''
+        order by created_at desc
+        limit greatest(1, least(coalesce(limit_n, 15), 40))
+      ) s
+    ),
+    '[]'::json
+  );
+$$;
+
+grant execute on function public.track_feed_recent(integer) to anon, authenticated;

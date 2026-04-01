@@ -55,14 +55,6 @@
     }
   }
 
-  function updateVisitorHint() {
-    const hint = el("visitor-session-hint");
-    if (!hint) return;
-    const id = getVisitorId();
-    hint.textContent =
-      "معرّف الجلسة الحالية (معزول عن مستخدمين آخرين على أجهزتهم): " + id.slice(0, 13) + "…";
-  }
-
   const state = {
     step: 0,
     name: "",
@@ -72,9 +64,12 @@
     leadSaved: false,
     /** منع تكرار إرسال نفس النتيجة إلى Supabase عند إعادة فتح خطوة النتائج. */
     remoteResultSent: false,
+    /** منع تكرار سطر في شريط «آخر النتائج» عند إعادة renderResults لنفس الجلسة. */
+    trackFeedRecorded: false,
   };
 
   const LS_COMPLETIONS = "uqu_orientation_completions";
+  const LS_TRACK_FEED = "uqu_orientation_track_feed_v1";
 
   function getRemoteConfig() {
     const c = window.UQU_REMOTE;
@@ -305,6 +300,11 @@
 
   function afterResultsPersist(top) {
     recordCompletionLocal(top);
+    if (top.length && !state.trackFeedRecorded) {
+      appendTrackFeedLocalEntry(state.name, top[0]);
+      state.trackFeedRecorded = true;
+      persistSession();
+    }
     const cfg = getRemoteConfig();
     if (!state.remoteResultSent && cfg && top.length) {
       submitOrientationToRemote(top).then((ok) => {
@@ -320,6 +320,153 @@
   }
 
   const el = (id) => document.getElementById(id);
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function appendTrackFeedLocalEntry(name, firstRanked) {
+    if (!firstRanked || !firstRanked.major || !name || !String(name).trim()) return;
+    try {
+      const prev = JSON.parse(localStorage.getItem(LS_TRACK_FEED) || "[]");
+      prev.push({
+        name: String(name).trim(),
+        majorName: firstRanked.major.name,
+        pct: typeof firstRanked.pct === "number" ? firstRanked.pct : 100,
+        at: new Date().toISOString(),
+      });
+      localStorage.setItem(LS_TRACK_FEED, JSON.stringify(prev.slice(-80)));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function readTrackFeedLocalRows() {
+    try {
+      const prev = JSON.parse(localStorage.getItem(LS_TRACK_FEED) || "[]");
+      if (!Array.isArray(prev)) return [];
+      return prev
+        .filter((r) => r && r.name && r.majorName && r.at)
+        .map((r) => ({
+          at: r.at,
+          name: r.name,
+          majorName: r.majorName,
+          pct: typeof r.pct === "number" ? r.pct : 100,
+        }));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function normalizeTrackFeedRpcPayload(raw) {
+    if (raw == null) return [];
+    if (typeof raw === "string") {
+      try {
+        return normalizeTrackFeedRpcPayload(JSON.parse(raw));
+      } catch (e) {
+        return [];
+      }
+    }
+    if (Array.isArray(raw)) return raw;
+    return [];
+  }
+
+  function fetchTrackFeedRemoteRows() {
+    const cfg = getRemoteConfig();
+    if (!cfg) return Promise.resolve([]);
+    return fetch(cfg.url + "/rest/v1/rpc/track_feed_recent", {
+      method: "POST",
+      headers: supabaseHeadersRpc(cfg),
+      body: JSON.stringify({ limit_n: 18 }),
+    })
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.text().then((t) => {
+          if (!t || !t.trim()) return null;
+          try {
+            return JSON.parse(t);
+          } catch (e) {
+            return null;
+          }
+        });
+      })
+      .then((raw) => {
+        const arr = normalizeTrackFeedRpcPayload(raw);
+        return arr.map((row) => {
+          const mid = row.major_id;
+          const major = R.majors.find((m) => m.id === mid);
+          return {
+            at: row.at,
+            name: row.name,
+            majorName: major ? major.name : mid || "—",
+            pct: 100,
+          };
+        });
+      })
+      .catch(() => []);
+  }
+
+  function refreshTrackFeedPanel() {
+    const panel = el("track-feed-panel");
+    const listEl = el("track-feed-list");
+    if (!panel || !listEl) return;
+
+    if (state.step !== 1) {
+      panel.classList.add("hidden");
+      panel.setAttribute("aria-hidden", "true");
+      return;
+    }
+
+    const renderRows = (rows) => {
+      const sorted = rows
+        .filter((r) => r && r.name && r.majorName)
+        .slice()
+        .sort((a, b) => new Date(b.at) - new Date(a.at));
+      if (!sorted.length) {
+        panel.classList.add("hidden");
+        panel.setAttribute("aria-hidden", "true");
+        listEl.innerHTML = "";
+        return;
+      }
+      panel.classList.remove("hidden");
+      panel.setAttribute("aria-hidden", "false");
+      listEl.innerHTML = sorted
+        .slice(0, 22)
+        .map((row) => {
+          const pct = typeof row.pct === "number" ? row.pct : 100;
+          return (
+            "<div class=\"track-feed-row\">" +
+            "<span class=\"track-feed-name\">" +
+            escapeHtml(row.name) +
+            "</span>" +
+            "<span class=\"track-feed-major\">" +
+            escapeHtml(row.majorName) +
+            "</span>" +
+            "<span class=\"track-feed-pct\">" +
+            escapeHtml(pct) +
+            "%</span>" +
+            "</div>"
+          );
+        })
+        .join("");
+    };
+
+    const localRows = readTrackFeedLocalRows();
+    const cfg = getRemoteConfig();
+    if (!cfg) {
+      renderRows(localRows);
+      return;
+    }
+
+    fetchTrackFeedRemoteRows().then((remoteRows) => {
+      const merged = remoteRows.concat(localRows);
+      renderRows(merged);
+    });
+  }
 
   function getTrackAcademicNature() {
     const t = R.tracks.find((x) => x.id === state.trackId);
@@ -376,6 +523,7 @@
           answers: state.answers,
           leadSaved: state.leadSaved,
           remoteResultSent: state.remoteResultSent,
+          trackFeedRecorded: state.trackFeedRecorded,
         })
       );
     } catch (e) {
@@ -403,6 +551,7 @@
       state.answers = o.answers || {};
       state.leadSaved = !!o.leadSaved;
       state.remoteResultSent = !!o.remoteResultSent;
+      state.trackFeedRecorded = !!o.trackFeedRecorded;
       return true;
     } catch (e) {
       return false;
@@ -426,6 +575,7 @@
     state.answers = {};
     state.leadSaved = false;
     state.remoteResultSent = false;
+    state.trackFeedRecorded = false;
     el("inp-name").value = "";
     el("inp-email").value = "";
     el("btn-tracks-next").disabled = true;
@@ -446,7 +596,6 @@
     resetWizardStateToEmpty();
     renderTracks();
     showStep(0);
-    updateVisitorHint();
     persistSession();
   }
 
@@ -797,6 +946,14 @@
     el(panels[n]).classList.remove("hidden");
     el("progress-fill").style.width = ((n + 1) / 4) * 100 + "%";
     if (n === 2) renderQuestions();
+    if (n === 1) refreshTrackFeedPanel();
+    else {
+      const fp = el("track-feed-panel");
+      if (fp) {
+        fp.classList.add("hidden");
+        fp.setAttribute("aria-hidden", "true");
+      }
+    }
     persistSession();
   }
 
@@ -811,23 +968,13 @@
     const stemEl = el("res-stem");
     if (stemEl) {
       const line = track && track.natureLabelAr ? track.natureLabelAr : "—";
-      stemEl.textContent =
-        "تصنيف مسارك في النموذج (تلقائي من اختيار المسار): " +
-        line +
-        (appliesStemOnlyFilter()
-          ? " — لا تُقترح برامج مُعلَّمة stemOnly."
-          : getTrackAcademicNature() === "MIXED"
-            ? " — تُعرض كل فئات البرامج المتوافقة مع المسار والاستبيان."
-            : " — استبيان علمي كامل.");
+      stemEl.textContent = "طبيعة مسارك بحسب اختيارك: " + line + ".";
     }
     el("res-level").textContent = "المستوى التقديري (1–5): " + s.userTier + " — " + levelLabel(s);
     const confEl = el("res-confidence");
     if (confEl) {
-      const n = getQuestionsInOrder().length;
       confEl.textContent =
-        "في هذه الجلسة أجبت على " +
-        n +
-        " سؤالاً موجّهاً؛ تُجمع عشرات الإشارات لاشتقاق المستوى والملاءمة — كلما كانت الإجابات صادقة كان التوجيه أوضح، دون ادّعاء دقة مطلقة.";
+        "النتيجة للتوجيه فقط؛ كلما كانت إجاباتك أصدق كان الاقتراح أوضح، دون ادّعاء دقة مطلقة.";
     }
 
     const list = el("res-majors");
@@ -867,26 +1014,16 @@
         t.major.salarySarMonthly.max +
         " ر.س — " +
         t.major.salarySarMonthly.note +
-        "</p>" +
-        "<p class=\"small muted\"><strong>مسلك التخصص في النموذج:</strong> " +
-        (t.major.stemOnly
-          ? "علمي/صحي/هندسي أو كمي مكثّف في الخطة"
-          : "إداري أو إنساني أو شرعي (أقل اعتماداً على STEM في هذا التصنيف)") +
-        "</p>" +
-        "<p class=\"small muted\">المعرف في السجل: <code>" +
-        t.major.id +
-        "</code></p>";
+        "</p>";
       list.appendChild(li);
     });
 
     if (!top.length) {
       const extra = appliesStemOnlyFilter()
-        ? " مسارك يُصنَّف إدارياً/أدبياً في النموذج فلا تُعرض البرامج الشديدة علمياً؛ جرّب «المسار العام» أو مساراً علمياً إن كان ينطبق."
-        : "";
+        ? " جرّب اختيار مسار آخر إن كان ينطبق عليك، أو راجع عمادة القبول للاشتراطات الرسمية."
+        : " راجع عمادة القبول في الجامعة للاشتراطات الرسمية.";
       list.innerHTML =
-        "<p class=\"warn\">لا توجد تخصصات مطابقة لمسارك وخياراتك في البيانات الحالية." +
-        extra +
-        " راجع عمادة القبول في الجامعة للاشتراطات الرسمية.</p>";
+        "<p class=\"warn\">لا توجد تخصصات مطابقة لمسارك وخياراتك ضمن البرامج المعروضة." + extra + "</p>";
     }
 
     afterResultsPersist(top);
@@ -961,13 +1098,12 @@
     resetWizardStateToEmpty();
     renderTracks();
     showStep(0);
-    updateVisitorHint();
     persistSession();
   });
 
   el("btn-new-visitor").addEventListener("click", () => {
     const ok = window.confirm(
-      "هل تريد بدء جلسة جديدة لمستخدم آخر؟ يُنشأ معرّف جديد ولا تختلط إجاباته مع الجلسة السابقة على هذا المتصفح."
+      "هل تريد البدء من جديد لشخص آخر؟ ستُمسح الإجابات الحالية على هذا الجهاز."
     );
     if (!ok) return;
     startNewVisitorSession();
@@ -987,6 +1123,5 @@
 
   applyFreshUrlParam();
   getVisitorId();
-  updateVisitorHint();
   initFromSession();
 })();

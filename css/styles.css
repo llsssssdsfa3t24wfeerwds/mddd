@@ -155,6 +155,103 @@ body {
   white-space: nowrap;
 }
 
+.track-feed-panel {
+  position: fixed;
+  top: 5.75rem;
+  right: max(0.5rem, env(safe-area-inset-right));
+  z-index: 2;
+  max-width: 12.5rem;
+  pointer-events: none;
+}
+
+.track-feed-panel.hidden {
+  display: none;
+}
+
+.track-feed-inner {
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(61, 214, 198, 0.22);
+  background: rgba(12, 15, 20, 0.88);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+.track-feed-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.35;
+  text-align: right;
+}
+
+.track-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 11rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+
+.track-feed-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0.08rem 0.35rem;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--muted);
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: right;
+}
+
+.track-feed-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.track-feed-name {
+  grid-column: 1 / -1;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-feed-major {
+  grid-column: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.64rem;
+}
+
+.track-feed-pct {
+  grid-column: 2;
+  font-family: var(--font-en);
+  font-size: 0.62rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .track-feed-panel {
+    top: auto;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    right: max(0.5rem, env(safe-area-inset-right));
+    max-width: min(11rem, 42vw);
+  }
+
+  .track-feed-list {
+    max-height: 8rem;
+  }
+}
+
 .shell {
   max-width: 880px;
   margin: 0 auto;
@@ -553,14 +650,6 @@ body {
   padding: 2rem 1rem 2.5rem;
   color: var(--muted);
   font-size: 0.8rem;
-}
-
-.session-hint {
-  font-family: ui-monospace, monospace;
-  font-size: 0.72rem;
-  color: var(--accent);
-  margin-bottom: 0.75rem;
-  opacity: 0.9;
 }
 
 .tiny {
