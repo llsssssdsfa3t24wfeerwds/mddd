@@ -70,6 +70,8 @@
 
   const LS_COMPLETIONS = "uqu_orientation_completions";
   const LS_TRACK_FEED = "uqu_orientation_track_feed_v1";
+  const LS_PERSISTED_PROFILE = "uqu_saved_profile_v1";
+  const SESSION_SKIP_SAVED_PROFILE = "uqu_skip_profile_autoshow_once";
 
   function normalizeEmailKey(email) {
     return String(email || "")
@@ -413,6 +415,7 @@
           at: r.at,
           name: r.name,
           majorName: r.majorName,
+          emailKey: normalizeEmailKey(r.emailKey || ""),
           pct: typeof r.pct === "number" ? r.pct : 100,
         }));
     } catch (e) {
@@ -470,11 +473,30 @@
             at: row.at != null ? String(row.at) : "",
             name: row.name != null ? String(row.name) : "",
             majorName: major ? major.name : mid || "—",
+            emailKey: normalizeEmailKey(row.email || ""),
             pct: 100,
           };
         }).filter(Boolean);
       })
       .catch(() => []);
+  }
+
+  /** دمج محلي + بعيد: صف واحد لكل بريد (أو اسم+تخصص إن لم يُرجَع بريد). */
+  function dedupeFeedRows(rows) {
+    const valid = (rows || []).filter((r) => r && r.name && r.majorName);
+    valid.sort((a, b) => new Date(b.at) - new Date(a.at));
+    const seen = new Map();
+    const out = [];
+    for (let i = 0; i < valid.length; i++) {
+      const r = valid[i];
+      const ek = normalizeEmailKey(r.emailKey || r.email || "");
+      const key = ek || normalizeEmailKey(r.name) + "|" + normalizeEmailKey(r.majorName);
+      if (seen.has(key)) continue;
+      seen.set(key, true);
+      out.push(r);
+    }
+    out.sort((a, b) => new Date(b.at) - new Date(a.at));
+    return out;
   }
 
   function refreshTrackFeedPanel() {
@@ -489,10 +511,7 @@
     }
 
     const renderRows = (rows, showEmptyHint) => {
-      const sorted = rows
-        .filter((r) => r && r.name && r.majorName)
-        .slice()
-        .sort((a, b) => new Date(b.at) - new Date(a.at));
+      const sorted = dedupeFeedRows(rows);
       if (!sorted.length) {
         if (showEmptyHint) {
           panel.classList.remove("hidden");
@@ -537,8 +556,7 @@
     }
 
     fetchTrackFeedRemoteRows().then((remoteRows) => {
-      const merged = (remoteRows || []).concat(localRows);
-      renderRows(merged, !!cfg);
+      renderRows((remoteRows || []).concat(localRows), !!cfg);
     });
   }
 
@@ -663,6 +681,7 @@
       if (prev) sessionStorage.removeItem(WIZARD_PREFIX + prev);
       sessionStorage.removeItem(VISITOR_ID_KEY);
       sessionStorage.removeItem(LEGACY_SESSION_KEY);
+      sessionStorage.setItem(SESSION_SKIP_SAVED_PROFILE, "1");
     } catch (e) {
       /* ignore */
     }
@@ -1015,6 +1034,92 @@
     });
   }
 
+  function loadPersistedProfile() {
+    try {
+      const raw = localStorage.getItem(LS_PERSISTED_PROFILE);
+      if (!raw) return null;
+      const o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return null;
+      const name = String(o.name || "").trim();
+      const email = String(o.email || "").trim();
+      if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+      return { name, email };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function savePersistedProfile(name, email) {
+    try {
+      localStorage.setItem(
+        LS_PERSISTED_PROFILE,
+        JSON.stringify({ name: String(name).trim(), email: String(email).trim() })
+      );
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function updateRegisterPanelMode() {
+    const savedBlock = el("register-saved-block");
+    const formReg = el("form-register");
+    if (!savedBlock || !formReg) return;
+    let skip = false;
+    try {
+      skip = sessionStorage.getItem(SESSION_SKIP_SAVED_PROFILE) === "1";
+      if (skip) sessionStorage.removeItem(SESSION_SKIP_SAVED_PROFILE);
+    } catch (e) {
+      /* ignore */
+    }
+    const p = loadPersistedProfile();
+    if (!skip && p) {
+      savedBlock.classList.remove("hidden");
+      formReg.classList.add("hidden");
+      const sn = el("saved-display-name");
+      const se = el("saved-display-email");
+      if (sn) sn.textContent = p.name;
+      if (se) se.textContent = p.email;
+    } else {
+      savedBlock.classList.add("hidden");
+      formReg.classList.remove("hidden");
+      if (p) {
+        el("inp-name").value = p.name;
+        el("inp-email").value = p.email;
+      }
+    }
+  }
+
+  function beginRegistration(name, email) {
+    const nameTr = String(name).trim();
+    const emailTr = String(email).trim();
+    if (nameTr.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTr)) {
+      alert("يرجى إدخال اسم صحيح وبريد إلكتروني صالح.");
+      return false;
+    }
+    const emailNorm = normalizeEmailKey(emailTr);
+    purgeLocalDataByEmail(emailNorm);
+    const cfg = getRemoteConfig();
+    if (cfg) {
+      void deleteRemoteSubmissionsByEmail(cfg, emailTr);
+    }
+
+    clearSession();
+    state.name = nameTr;
+    state.email = emailTr;
+    state.trackId = null;
+    state.answers = {};
+    state.leadSaved = false;
+    state.remoteResultSent = false;
+    state.trackFeedRecorded = false;
+    el("btn-tracks-next").disabled = true;
+    el("questions").innerHTML = "";
+    document.querySelectorAll(".choice.selected").forEach((x) => x.classList.remove("selected"));
+    savePersistedProfile(nameTr, emailTr);
+    renderTracks();
+    showStep(1);
+    return true;
+  }
+
   function showStep(n) {
     state.step = n;
     document.querySelectorAll(".panel").forEach((p) => p.classList.add("hidden"));
@@ -1030,6 +1135,7 @@
         fp.setAttribute("aria-hidden", "true");
       }
     }
+    if (n === 0) updateRegisterPanelMode();
     persistSession();
   }
 
@@ -1135,34 +1241,36 @@
 
   el("form-register").addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = el("inp-name").value.trim();
-    const email = el("inp-email").value.trim();
-    if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      alert("يرجى إدخال اسم صحيح وبريد إلكتروني صالح.");
-      return;
-    }
-    const emailNorm = normalizeEmailKey(email);
-    purgeLocalDataByEmail(emailNorm);
-    const cfg = getRemoteConfig();
-    if (cfg) {
-      void deleteRemoteSubmissionsByEmail(cfg, email);
-    }
-
-    clearSession();
-    state.name = name;
-    state.email = email;
-    state.trackId = null;
-    state.answers = {};
-    state.leadSaved = false;
-    state.remoteResultSent = false;
-    state.trackFeedRecorded = false;
-    el("btn-tracks-next").disabled = true;
-    el("questions").innerHTML = "";
-    document.querySelectorAll(".choice.selected").forEach((x) => x.classList.remove("selected"));
-    renderTracks();
-    showStep(1);
-    persistSession();
+    beginRegistration(el("inp-name").value, el("inp-email").value);
   });
+
+  const btnStartSaved = el("btn-start-saved");
+  if (btnStartSaved) {
+    btnStartSaved.addEventListener("click", () => {
+      const p = loadPersistedProfile();
+      if (!p) {
+        updateRegisterPanelMode();
+        return;
+      }
+      beginRegistration(p.name, p.email);
+    });
+  }
+
+  const btnEditRegister = el("btn-edit-register");
+  if (btnEditRegister) {
+    btnEditRegister.addEventListener("click", () => {
+      const savedBlock = el("register-saved-block");
+      const formReg = el("form-register");
+      if (savedBlock) savedBlock.classList.add("hidden");
+      if (formReg) formReg.classList.remove("hidden");
+      const p = loadPersistedProfile();
+      if (p) {
+        el("inp-name").value = p.name;
+        el("inp-email").value = p.email;
+      }
+      el("inp-name").focus();
+    });
+  }
 
   el("btn-tracks-next").addEventListener("click", () => {
     if (!state.trackId) return;

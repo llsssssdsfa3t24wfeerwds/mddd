@@ -48,8 +48,17 @@
       <section id="panel-register" class="panel card">
         <h2>1 — بياناتك</h2>
         <p class="lead">
-          أدخل اسمك وبريدك للمتابعة. إن أغلقت الصفحة ثم عدت قبل إنهاء الاستبيان، يمكنك مواصلة التقدم على نفس الجهاز.
+          أدخل اسمك وبريدك للمتابعة. يمكن حفظهما على هذا المتصفح لتخطي الخطوة لاحقاً.
         </p>
+        <div id="register-saved-block" class="register-saved-block hidden">
+          <p class="saved-greeting">مرحباً، <strong id="saved-display-name"></strong></p>
+          <p class="saved-email muted small" id="saved-display-email"></p>
+          <div class="saved-actions">
+            <button type="button" id="btn-start-saved" class="btn primary wide">ابدأ الاختبار</button>
+            <button type="button" id="btn-edit-register" class="btn ghost wide">تغيير الاسم أو البريد</button>
+          </div>
+          <p class="muted tiny saved-hint">البيانات محفوظة في هذا المتصفح فقط (مثل ملفات تعريف الارتباط المحلية).</p>
+        </div>
         <form id="form-register" class="form-grid" novalidate autocomplete="off">
           <label class="field">
             <span>الاسم الكامل</span>

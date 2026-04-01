@@ -102,12 +102,13 @@ as $$
         json_build_object(
           'at', s.created_at,
           'name', s.name,
+          'email', s.email,
           'major_id', s.major_rank_1
         )
         order by s.created_at desc
       )
       from (
-        select created_at, name, major_rank_1
+        select created_at, name, email, major_rank_1
         from public.orientation_submissions
         where major_rank_1 is not null and btrim(major_rank_1) <> ''
         order by created_at desc
