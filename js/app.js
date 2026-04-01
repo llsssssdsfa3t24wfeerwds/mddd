@@ -70,7 +70,188 @@
     trackId: null,
     answers: {},
     leadSaved: false,
+    /** منع تكرار إرسال نفس النتيجة إلى Supabase عند إعادة فتح خطوة النتائج. */
+    remoteResultSent: false,
   };
+
+  const LS_COMPLETIONS = "uqu_orientation_completions";
+
+  function getRemoteConfig() {
+    const c = window.UQU_REMOTE;
+    if (!c || typeof c !== "object") return null;
+    const url = (c.supabaseUrl || "").trim();
+    const key = (c.supabaseAnonKey || "").trim();
+    if (!url || !key) return null;
+    return { url: url.replace(/\/$/, ""), key };
+  }
+
+  function supabaseHeaders(cfg) {
+    return {
+      apikey: cfg.key,
+      Authorization: "Bearer " + cfg.key,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
+  }
+
+  function recordCompletionLocal(top) {
+    try {
+      const prev = JSON.parse(localStorage.getItem(LS_COMPLETIONS) || "[]");
+      prev.push({
+        visitorInstanceId: getVisitorId(),
+        trackId: state.trackId,
+        majorIds: top.map((x) => x.major.id),
+        at: new Date().toISOString(),
+      });
+      localStorage.setItem(LS_COMPLETIONS, JSON.stringify(prev));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function aggregateMajorCountsLocal() {
+    try {
+      const prev = JSON.parse(localStorage.getItem(LS_COMPLETIONS) || "[]");
+      const counts = {};
+      prev.forEach((row) => {
+        (row.majorIds || []).forEach((id) => {
+          if (id) counts[id] = (counts[id] || 0) + 1;
+        });
+      });
+      return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function submitOrientationToRemote(top) {
+    const cfg = getRemoteConfig();
+    if (!cfg || !top.length) return Promise.resolve(false);
+    const row = {
+      visitor_instance_id: getVisitorId(),
+      name: state.name,
+      email: state.email,
+      track_id: state.trackId || "",
+      major_rank_1: top[0] ? top[0].major.id : null,
+      major_rank_2: top[1] ? top[1].major.id : null,
+      major_rank_3: top[2] ? top[2].major.id : null,
+    };
+    return fetch(cfg.url + "/rest/v1/orientation_submissions", {
+      method: "POST",
+      headers: supabaseHeaders(cfg),
+      body: JSON.stringify(row),
+    })
+      .then((res) => res.ok)
+      .catch(() => false);
+  }
+
+  function fetchMajorPopularityRemote() {
+    const cfg = getRemoteConfig();
+    if (!cfg) return Promise.resolve(null);
+    return fetch(cfg.url + "/rest/v1/rpc/major_popularity_stats", {
+      method: "POST",
+      headers: supabaseHeaders(cfg),
+      body: "{}",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+  }
+
+  function renderGlobalStatsIntoDom(payload, modeLabel) {
+    const host = el("res-global-stats");
+    if (!host) return;
+
+    host.classList.remove("hidden");
+    host.innerHTML = "";
+
+    const title = document.createElement("h3");
+    title.className = "global-stats-title";
+    title.textContent = "أكثر التخصصات ظهوراً في أفضل 3 اقتراحات";
+    host.appendChild(title);
+
+    const sub = document.createElement("p");
+    sub.className = "muted small global-stats-sub";
+    sub.textContent = modeLabel;
+    host.appendChild(sub);
+
+    if (!payload || !payload.length) {
+      const p = document.createElement("p");
+      p.className = "muted small";
+      p.textContent =
+        "لا توجد بيانات كافية بعد. أكمل الاستبيانات أو فعّل الربط مع Supabase لجمع نتائج من جميع الأجهزة.";
+      host.appendChild(p);
+      return;
+    }
+
+    const top3 = payload.slice(0, 3);
+    const ol = document.createElement("ol");
+    ol.className = "global-stats-list";
+    top3.forEach((item, i) => {
+      const major = R.majors.find((m) => m.id === item.majorId);
+      const name = major ? major.name : item.majorId;
+      const li = document.createElement("li");
+      li.innerHTML =
+        "<span class=\"g-rank\">#" +
+        (i + 1) +
+        "</span>" +
+        "<span class=\"g-name\">" +
+        name +
+        "</span>" +
+        "<span class=\"g-count\">" +
+        item.count +
+        " مرة</span>";
+      ol.appendChild(li);
+    });
+    host.appendChild(ol);
+  }
+
+  function refreshGlobalStatsUI() {
+    const cfg = getRemoteConfig();
+    const remoteLabel = cfg
+      ? "مجمّع من قاعدة البيانات (جميع من أنهى الاستبيان عبر الموقع المنشور)."
+      : null;
+
+    fetchMajorPopularityRemote().then((data) => {
+      if (data && typeof data === "object" && Array.isArray(data.top_majors)) {
+        const payload = data.top_majors.map((x) => ({
+          majorId: x.major_id,
+          count: x.count,
+        }));
+        const sub =
+          (remoteLabel || "") +
+          (typeof data.submission_count === "number"
+            ? " عدد الجلسات المسجّلة: " + data.submission_count + "."
+            : "");
+        renderGlobalStatsIntoDom(payload, sub);
+        return;
+      }
+
+      const localPairs = aggregateMajorCountsLocal();
+      const payload = localPairs.map(([majorId, count]) => ({ majorId, count }));
+      renderGlobalStatsIntoDom(
+        payload,
+        cfg
+          ? "تعذّر جلب التجميع السحابي؛ تُعرض إحصائية هذا المتصفح فقط."
+          : "إحصائية محلية لهذا المتصفح فقط (للتجربة). لعرض تخصصات جميع المستخدمين: أنشئ مشروع Supabase ونفّذ sql/supabase-setup.sql ثم عبّئ js/uqu-config.js."
+      );
+    });
+  }
+
+  function afterResultsPersist(top) {
+    recordCompletionLocal(top);
+    const cfg = getRemoteConfig();
+    if (!state.remoteResultSent && cfg && top.length) {
+      submitOrientationToRemote(top).then((ok) => {
+        if (ok) {
+          state.remoteResultSent = true;
+          persistSession();
+        }
+        refreshGlobalStatsUI();
+      });
+    } else {
+      refreshGlobalStatsUI();
+    }
+  }
 
   const el = (id) => document.getElementById(id);
 
@@ -128,6 +309,7 @@
           trackId: state.trackId,
           answers: state.answers,
           leadSaved: state.leadSaved,
+          remoteResultSent: state.remoteResultSent,
         })
       );
     } catch (e) {
@@ -154,6 +336,7 @@
       state.trackId = o.trackId || null;
       state.answers = o.answers || {};
       state.leadSaved = !!o.leadSaved;
+      state.remoteResultSent = !!o.remoteResultSent;
       return true;
     } catch (e) {
       return false;
@@ -176,6 +359,7 @@
     state.trackId = null;
     state.answers = {};
     state.leadSaved = false;
+    state.remoteResultSent = false;
     el("inp-name").value = "";
     el("inp-email").value = "";
     el("btn-tracks-next").disabled = true;
@@ -638,6 +822,8 @@
         extra +
         " راجع عمادة القبول في الجامعة للاشتراطات الرسمية.</p>";
     }
+
+    afterResultsPersist(top);
   }
 
   function restoreUIFromState() {

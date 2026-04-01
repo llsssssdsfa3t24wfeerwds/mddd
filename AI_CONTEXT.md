@@ -60,20 +60,25 @@
 - **زر «دخول كمستخدم جديد»**: نفس فكرة جلسة زائر جديدة يدوياً.
 - **الترحية من المفتاح القديم:** لمرة واحدة يُقرأ `uqu_orientation_session_v2` إن وُجد ويُنقل للمفتاح الجديد.
 - **أجهزة مختلفة:** كل جهاز له `sessionStorage` مستقل — نفس الرابط لا يوحّد الجلسات بين الأجهزة.
-- سجلات `localStorage` (`uqu_orientation_leads`) تتضمّن الآن `visitorInstanceId` للتمييز عند التحليل المحلي.
+- سجلات `localStorage` (`uqu_orientation_leads`) تتضمّن `visitorInstanceId`؛ و`uqu_orientation_completions` تسجّل كل إكمال نتيجة (معرفات التخصصات الثلاثة من السجل) للإحصائية المحلية في المتصفح.
 
 ### المزامنة مع الواجهة
 
 - `syncAnswersFromDOM()`, `applyAnswersToRadios()`, `pruneAnswersToVisible()` كما في الكود.
 - `beforeunload` / `pageshow` للحفظ والمزامنة.
 
-### تسجيل المستخدم (محلي)
+### تسجيل المستخدم والنتائج
 
 - أول انتقال للاستبيان: `saveLead()` مع `leadSaved` لمنع التكرار في نفس جلسة الزائر.
+- بعد `renderResults()`: `afterResultsPersist(top)` — يحدّث `uqu_orientation_completions` محلياً، ويُرسِل صفاً إلى Supabase عند تعبئة `window.UQU_REMOTE` في `js/uqu-config.js` (معطّل افتراضياً إذا بقي الحقلان فارغين).
+- الحقول المرسلة للسحابة: `visitor_instance_id`, `name`, `email`, `track_id`, `major_rank_1..3` (قيم `id` من `majors` في السجل فقط).
+- **`remoteResultSent`** يُخزَّن في جلسة المعالج لتجنّب إعادة الإرسال عند إعادة فتح خطوة النتائج.
+- **لوحة النتائج — كتلة «أكثر التخصصات ظهوراً»:** تستدعي RPC `major_popularity_stats()` (تعريفها في `sql/supabase-setup.sql`) لعرض أكثر المعرفات (`MAJ_*`) تكراراً ضمن المراكز الثلاثة عبر **جميع** الإرسالات، مع تسمية العرض من `R.majors` (متوافق مع REGISTRY). الزائر لا يستطيع `SELECT` على الجدول مباشرة؛ التجميع عبر دالة `SECURITY DEFINER`.
+- بدون Supabase: تُحسب الإحصائية من `uqu_orientation_completions` في **نفس المتصفح** فقط (نص توضيحي في الواجهة).
 
 ## الملفات
 
-- `index.html`, `css/styles.css`, `data/registry-bundle.js`, `js/app.js`
+- `index.html`, `css/styles.css`, `data/registry-bundle.js`, `js/uqu-config.js`, `js/app.js`, `sql/supabase-setup.sql`
 - `README.md` — نشر GitHub Pages وجلسات متعددة
 - `.nojekyll` — لصفحات GitHub
 

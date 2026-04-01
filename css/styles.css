@@ -417,6 +417,67 @@ body {
   gap: 1rem;
 }
 
+.global-stats {
+  margin-top: 1.75rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: 14px;
+  border: 1px dashed rgba(61, 214, 198, 0.35);
+  background: rgba(61, 214, 198, 0.06);
+}
+
+.global-stats.hidden {
+  display: none;
+}
+
+.global-stats-title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.global-stats-sub {
+  margin: 0 0 1rem;
+}
+
+.global-stats-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.global-stats-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+}
+
+.global-stats .g-rank {
+  font-family: var(--font-en);
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.global-stats .g-name {
+  flex: 1;
+  min-width: 10rem;
+  font-weight: 600;
+}
+
+.global-stats .g-count {
+  font-family: var(--font-en);
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
 .major-card {
   border: 1px solid var(--border);
   border-radius: 14px;
