@@ -370,9 +370,11 @@
           persistSession();
         }
         refreshGlobalStatsUI();
+        refreshTrackFeedPanel();
       });
     } else {
       refreshGlobalStatsUI();
+      refreshTrackFeedPanel();
     }
   }
 
@@ -503,12 +505,6 @@
     const panel = el("track-feed-panel");
     const listEl = el("track-feed-list");
     if (!panel || !listEl) return;
-
-    if (state.step > 2) {
-      panel.classList.add("hidden");
-      panel.setAttribute("aria-hidden", "true");
-      return;
-    }
 
     const renderRows = (rows, showEmptyHint) => {
       const sorted = dedupeFeedRows(rows);
@@ -1127,14 +1123,7 @@
     el(panels[n]).classList.remove("hidden");
     el("progress-fill").style.width = ((n + 1) / 4) * 100 + "%";
     if (n === 2) renderQuestions();
-    if (n <= 2) refreshTrackFeedPanel();
-    else {
-      const fp = el("track-feed-panel");
-      if (fp) {
-        fp.classList.add("hidden");
-        fp.setAttribute("aria-hidden", "true");
-      }
-    }
+    refreshTrackFeedPanel();
     if (n === 0) updateRegisterPanelMode();
     persistSession();
   }
