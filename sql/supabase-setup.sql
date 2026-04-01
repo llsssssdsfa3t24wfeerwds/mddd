@@ -19,13 +19,41 @@ grant insert on table public.orientation_submissions to anon;
 
 alter table public.orientation_submissions enable row level security;
 
--- إدراج من التطبيق (مفتاح anon) فقط
+-- إدراج من التطبيق (مفتاح anon) مع شروط تقلل الإساءة وتتماشى مع REGISTRY (ليست true دائماً)
+-- مسارات الثانوي المعتمدة في data/registry-bundle.js:
 drop policy if exists "orientation_submissions_anon_insert" on public.orientation_submissions;
 create policy "orientation_submissions_anon_insert"
   on public.orientation_submissions
   for insert
   to anon
-  with check (true);
+  with check (
+    track_id in (
+      'TRACK_GEN',
+      'TRACK_SHAR',
+      'TRACK_BUS',
+      'TRACK_CSE',
+      'TRACK_HLT'
+    )
+    and char_length(btrim(name)) between 2 and 200
+    and char_length(btrim(email)) between 3 and 320
+    and btrim(email) ~* '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'
+    and (
+      visitor_instance_id is null
+      or char_length(visitor_instance_id) between 8 and 128
+    )
+    and (
+      major_rank_1 is null
+      or (char_length(major_rank_1) between 4 and 64 and major_rank_1 ~ '^MAJ_[A-Z0-9_]+$')
+    )
+    and (
+      major_rank_2 is null
+      or (char_length(major_rank_2) between 4 and 64 and major_rank_2 ~ '^MAJ_[A-Z0-9_]+$')
+    )
+    and (
+      major_rank_3 is null
+      or (char_length(major_rank_3) between 4 and 64 and major_rank_3 ~ '^MAJ_[A-Z0-9_]+$')
+    )
+  );
 
 -- لا تضف سياسة SELECT لـ anon — لا يقرأ الزائر الصفوف مباشرة
 
