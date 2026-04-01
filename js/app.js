@@ -85,13 +85,49 @@
     return { url: url.replace(/\/$/, ""), key };
   }
 
-  function supabaseHeaders(cfg) {
+  function supabaseHeadersInsert(cfg) {
     return {
       apikey: cfg.key,
       Authorization: "Bearer " + cfg.key,
       "Content-Type": "application/json",
+      Accept: "application/json",
       Prefer: "return=minimal",
     };
+  }
+
+  function supabaseHeadersRpc(cfg) {
+    return {
+      apikey: cfg.key,
+      Authorization: "Bearer " + cfg.key,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+  }
+
+  function normalizeRpcStatsResponse(raw) {
+    if (raw == null) return null;
+    let data = raw;
+    if (typeof raw === "string") {
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+    if (Array.isArray(data)) {
+      if (data.length === 1 && data[0] && typeof data[0] === "object" && !Array.isArray(data[0])) {
+        data = data[0];
+      } else {
+        return null;
+      }
+    }
+    if (!data || typeof data !== "object") return null;
+    if (!Object.prototype.hasOwnProperty.call(data, "top_majors")) return null;
+    const majors = data.top_majors;
+    const top_majors = Array.isArray(majors) ? majors : [];
+    const submission_count =
+      typeof data.submission_count === "number" ? data.submission_count : undefined;
+    return { top_majors, submission_count };
   }
 
   function recordCompletionLocal(top) {
@@ -138,7 +174,7 @@
     };
     return fetch(cfg.url + "/rest/v1/orientation_submissions", {
       method: "POST",
-      headers: supabaseHeaders(cfg),
+      headers: supabaseHeadersInsert(cfg),
       body: JSON.stringify(row),
     })
       .then((res) => res.ok)
@@ -150,16 +186,41 @@
     if (!cfg) return Promise.resolve(null);
     return fetch(cfg.url + "/rest/v1/rpc/major_popularity_stats", {
       method: "POST",
-      headers: supabaseHeaders(cfg),
+      headers: supabaseHeadersRpc(cfg),
       body: "{}",
     })
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        if (!res.ok) return Promise.resolve(null);
+        return res.text().then((t) => {
+          if (!t || !t.trim()) return null;
+          try {
+            return JSON.parse(t);
+          } catch (e) {
+            return null;
+          }
+        });
+      })
+      .then((raw) => normalizeRpcStatsResponse(raw))
       .catch(() => null);
   }
 
-  function renderGlobalStatsIntoDom(payload, modeLabel) {
+  function hideGlobalStats() {
     const host = el("res-global-stats");
     if (!host) return;
+    host.classList.add("hidden");
+    host.innerHTML = "";
+  }
+
+  /** subtitle: نص تحت العنوان أو null. emptyHint: إن لم توجد صفوف لكن نريد إظهار القسم (قاعدة فارغة). */
+  function renderGlobalStatsIntoDom(payload, subtitle, emptyHint) {
+    const host = el("res-global-stats");
+    if (!host) return;
+
+    const hasRows = payload && payload.length > 0;
+    if (!hasRows && !emptyHint) {
+      hideGlobalStats();
+      return;
+    }
 
     host.classList.remove("hidden");
     host.innerHTML = "";
@@ -169,16 +230,17 @@
     title.textContent = "أكثر التخصصات ظهوراً في أفضل 3 اقتراحات";
     host.appendChild(title);
 
-    const sub = document.createElement("p");
-    sub.className = "muted small global-stats-sub";
-    sub.textContent = modeLabel;
-    host.appendChild(sub);
+    if (subtitle) {
+      const sub = document.createElement("p");
+      sub.className = "muted small global-stats-sub";
+      sub.textContent = subtitle;
+      host.appendChild(sub);
+    }
 
-    if (!payload || !payload.length) {
+    if (!hasRows) {
       const p = document.createElement("p");
       p.className = "muted small";
-      p.textContent =
-        "لا توجد بيانات كافية بعد. أكمل الاستبيانات أو فعّل الربط مع Supabase لجمع نتائج من جميع الأجهزة.";
+      p.textContent = emptyHint;
       host.appendChild(p);
       return;
     }
@@ -207,33 +269,37 @@
 
   function refreshGlobalStatsUI() {
     const cfg = getRemoteConfig();
-    const remoteLabel = cfg
-      ? "مجمّع من قاعدة البيانات (جميع من أنهى الاستبيان عبر الموقع المنشور)."
-      : null;
+
+    if (!cfg) {
+      const localPairs = aggregateMajorCountsLocal();
+      const payload = localPairs.map(([majorId, count]) => ({ majorId, count }));
+      renderGlobalStatsIntoDom(payload, null, null);
+      return;
+    }
 
     fetchMajorPopularityRemote().then((data) => {
-      if (data && typeof data === "object" && Array.isArray(data.top_majors)) {
+      if (data && Array.isArray(data.top_majors)) {
         const payload = data.top_majors.map((x) => ({
           majorId: x.major_id,
           count: x.count,
         }));
-        const sub =
-          (remoteLabel || "") +
-          (typeof data.submission_count === "number"
-            ? " عدد الجلسات المسجّلة: " + data.submission_count + "."
-            : "");
-        renderGlobalStatsIntoDom(payload, sub);
+        let sub = "من قاعدة البيانات (جميع المستخدمين).";
+        if (typeof data.submission_count === "number") {
+          sub += " عدد الجلسات المسجّلة: " + data.submission_count + ".";
+        }
+        const emptyHint =
+          payload.length === 0
+            ? typeof data.submission_count === "number" && data.submission_count === 0
+              ? "لا توجد جلسات في القاعدة بعد."
+              : "لا توجد تخصصات مُجمَّعة للعرض بعد."
+            : null;
+        renderGlobalStatsIntoDom(payload, sub, emptyHint);
         return;
       }
 
       const localPairs = aggregateMajorCountsLocal();
       const payload = localPairs.map(([majorId, count]) => ({ majorId, count }));
-      renderGlobalStatsIntoDom(
-        payload,
-        cfg
-          ? "تعذّر جلب التجميع السحابي؛ تُعرض إحصائية هذا المتصفح فقط."
-          : "إحصائية محلية لهذا المتصفح فقط (للتجربة). لعرض تخصصات جميع المستخدمين: أنشئ مشروع Supabase ونفّذ sql/supabase-setup.sql ثم عبّئ js/uqu-config.js."
-      );
+      renderGlobalStatsIntoDom(payload, null, null);
     });
   }
 

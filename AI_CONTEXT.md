@@ -75,7 +75,7 @@
 - **`remoteResultSent`** يُخزَّن في جلسة المعالج لتجنّب إعادة الإرسال عند إعادة فتح خطوة النتائج.
 - **لوحة النتائج — كتلة «أكثر التخصصات ظهوراً»:** تستدعي RPC `major_popularity_stats()` (تعريفها في `sql/supabase-setup.sql`) لعرض أكثر المعرفات (`MAJ_*`) تكراراً ضمن المراكز الثلاثة عبر **جميع** الإرسالات، مع تسمية العرض من `R.majors` (متوافق مع REGISTRY). الزائر لا يستطيع `SELECT` على الجدول مباشرة؛ التجميع عبر دالة `SECURITY DEFINER`.
 - **RLS للإدراج (anon):** سياسة `orientation_submissions_anon_insert` تستخدم `WITH CHECK` مقيداً (مسار من قائمة `TRACK_*` السجلية، بريد واسم بطول معقول، معرفات تخصص `MAJ_[A-Z0-9_]+` أو فراغ) لتقليل سياسة «دائماً true» دون كسر التطبيق الثابت.
-- بدون Supabase: تُحسب الإحصائية من `uqu_orientation_completions` في **نفس المتصفح** فقط (نص توضيحي في الواجهة).
+- بدون Supabase (`UQU_REMOTE` فارغ): تُعرض الإحصائية من `uqu_orientation_completions` في **نفس المتصفح** فقط إن وُجدت بيانات؛ وإلا يُخفى قسم الإحصائية دون نص إرشادي طويل. مع Supabase: طلب RPC بدون ترويسة `Prefer: return=minimal`؛ استجابة JSON تُطبَّع عبر `normalizeRpcStatsResponse`.
 
 ## الملفات
 
