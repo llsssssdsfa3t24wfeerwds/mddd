@@ -119,3 +119,25 @@ as $$
 $$;
 
 grant execute on function public.track_feed_recent(integer) to anon, authenticated;
+
+-- عند إعادة الاختبار بنفس البريد: حذف الصفوف السابقة قبل إدراج نتيجة جديدة (يُستدعى من التطبيق)
+create or replace function public.delete_orientation_by_email(p_email text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  n int := 0;
+begin
+  if p_email is null or length(btrim(p_email)) < 3 then
+    return 0;
+  end if;
+  delete from public.orientation_submissions
+  where lower(btrim(email)) = lower(btrim(p_email));
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+
+grant execute on function public.delete_orientation_by_email(text) to anon, authenticated;

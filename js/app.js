@@ -71,6 +71,54 @@
   const LS_COMPLETIONS = "uqu_orientation_completions";
   const LS_TRACK_FEED = "uqu_orientation_track_feed_v1";
 
+  function normalizeEmailKey(email) {
+    return String(email || "")
+      .trim()
+      .toLowerCase();
+  }
+
+  /** إزالة كل السجلات المحلية المرتبطة بنفس البريد (إعادة اختبار). */
+  function purgeLocalDataByEmail(emailNorm) {
+    if (!emailNorm) return;
+    try {
+      const leadsKey = "uqu_orientation_leads";
+      const leads = JSON.parse(localStorage.getItem(leadsKey) || "[]");
+      localStorage.setItem(
+        leadsKey,
+        JSON.stringify(leads.filter((r) => normalizeEmailKey(r.email) !== emailNorm))
+      );
+
+      const comp = JSON.parse(localStorage.getItem(LS_COMPLETIONS) || "[]");
+      localStorage.setItem(
+        LS_COMPLETIONS,
+        JSON.stringify(
+          comp.filter((r) => normalizeEmailKey(r.emailKey || r.email || "") !== emailNorm)
+        )
+      );
+
+      const feed = JSON.parse(localStorage.getItem(LS_TRACK_FEED) || "[]");
+      localStorage.setItem(
+        LS_TRACK_FEED,
+        JSON.stringify(
+          feed.filter((r) => normalizeEmailKey(r.emailKey || "") !== emailNorm)
+        )
+      );
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function deleteRemoteSubmissionsByEmail(cfg, emailRaw) {
+    if (!cfg || !emailRaw || String(emailRaw).trim().length < 3) return Promise.resolve(false);
+    return fetch(cfg.url + "/rest/v1/rpc/delete_orientation_by_email", {
+      method: "POST",
+      headers: supabaseHeadersRpc(cfg),
+      body: JSON.stringify({ p_email: String(emailRaw).trim() }),
+    })
+      .then((res) => res.ok)
+      .catch(() => false);
+  }
+
   function getRemoteConfig() {
     const c = window.UQU_REMOTE;
     if (!c || typeof c !== "object") return null;
@@ -127,14 +175,17 @@
 
   function recordCompletionLocal(top) {
     try {
+      const ek = normalizeEmailKey(state.email);
       const prev = JSON.parse(localStorage.getItem(LS_COMPLETIONS) || "[]");
-      prev.push({
+      const filtered = prev.filter((r) => normalizeEmailKey(r.emailKey || r.email || "") !== ek);
+      filtered.push({
         visitorInstanceId: getVisitorId(),
+        emailKey: ek,
         trackId: state.trackId,
         majorIds: top.map((x) => x.major.id),
         at: new Date().toISOString(),
       });
-      localStorage.setItem(LS_COMPLETIONS, JSON.stringify(prev));
+      localStorage.setItem(LS_COMPLETIONS, JSON.stringify(filtered));
     } catch (e) {
       /* ignore */
     }
@@ -167,11 +218,15 @@
       major_rank_2: top[1] ? top[1].major.id : null,
       major_rank_3: top[2] ? top[2].major.id : null,
     };
-    return fetch(cfg.url + "/rest/v1/orientation_submissions", {
-      method: "POST",
-      headers: supabaseHeadersInsert(cfg),
-      body: JSON.stringify(row),
-    })
+    return deleteRemoteSubmissionsByEmail(cfg, state.email)
+      .catch(() => false)
+      .then(() =>
+        fetch(cfg.url + "/rest/v1/orientation_submissions", {
+          method: "POST",
+          headers: supabaseHeadersInsert(cfg),
+          body: JSON.stringify(row),
+        })
+      )
       .then((res) => res.ok)
       .catch(() => false);
   }
@@ -332,14 +387,17 @@
   function appendTrackFeedLocalEntry(name, firstRanked) {
     if (!firstRanked || !firstRanked.major || !name || !String(name).trim()) return;
     try {
+      const ek = normalizeEmailKey(state.email);
       const prev = JSON.parse(localStorage.getItem(LS_TRACK_FEED) || "[]");
-      prev.push({
+      const filtered = prev.filter((r) => normalizeEmailKey(r.emailKey || "") !== ek);
+      filtered.push({
+        emailKey: ek,
         name: String(name).trim(),
         majorName: firstRanked.major.name,
         pct: typeof firstRanked.pct === "number" ? firstRanked.pct : 100,
         at: new Date().toISOString(),
       });
-      localStorage.setItem(LS_TRACK_FEED, JSON.stringify(prev.slice(-80)));
+      localStorage.setItem(LS_TRACK_FEED, JSON.stringify(filtered.slice(-80)));
     } catch (e) {
       /* ignore */
     }
@@ -842,9 +900,11 @@
       at: new Date().toISOString(),
     };
     const key = "uqu_orientation_leads";
+    const ek = normalizeEmailKey(state.email);
     const prev = JSON.parse(localStorage.getItem(key) || "[]");
-    prev.push(row);
-    localStorage.setItem(key, JSON.stringify(prev));
+    const filtered = prev.filter((r) => normalizeEmailKey(r.email) !== ek);
+    filtered.push(row);
+    localStorage.setItem(key, JSON.stringify(filtered));
     state.leadSaved = true;
   }
 
@@ -1065,8 +1125,25 @@
       alert("يرجى إدخال اسم صحيح وبريد إلكتروني صالح.");
       return;
     }
+    const emailNorm = normalizeEmailKey(email);
+    purgeLocalDataByEmail(emailNorm);
+    const cfg = getRemoteConfig();
+    if (cfg) {
+      void deleteRemoteSubmissionsByEmail(cfg, email);
+    }
+
+    clearSession();
     state.name = name;
     state.email = email;
+    state.trackId = null;
+    state.answers = {};
+    state.leadSaved = false;
+    state.remoteResultSent = false;
+    state.trackFeedRecorded = false;
+    el("btn-tracks-next").disabled = true;
+    el("questions").innerHTML = "";
+    document.querySelectorAll(".choice.selected").forEach((x) => x.classList.remove("selected"));
+    renderTracks();
     showStep(1);
     persistSession();
   });
