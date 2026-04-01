@@ -196,6 +196,14 @@ body {
   scrollbar-width: thin;
 }
 
+.track-feed-empty {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: right;
+}
+
 .track-feed-row {
   display: grid;
   grid-template-columns: 1fr auto;

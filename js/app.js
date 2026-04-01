@@ -157,14 +157,14 @@
         return null;
       }
     }
-    if (Array.isArray(data)) {
-      if (data.length === 1 && data[0] && typeof data[0] === "object" && !Array.isArray(data[0])) {
+    for (let d = 0; d < 6; d++) {
+      if (Array.isArray(data) && data.length === 1 && data[0] && typeof data[0] === "object" && !Array.isArray(data[0])) {
         data = data[0];
-      } else {
-        return null;
+        continue;
       }
+      break;
     }
-    if (!data || typeof data !== "object") return null;
+    if (!data || typeof data !== "object" || Array.isArray(data)) return null;
     if (!Object.prototype.hasOwnProperty.call(data, "top_majors")) return null;
     const majors = data.top_majors;
     const top_majors = Array.isArray(majors) ? majors : [];
@@ -422,15 +422,23 @@
 
   function normalizeTrackFeedRpcPayload(raw) {
     if (raw == null) return [];
-    if (typeof raw === "string") {
+    let v = raw;
+    if (typeof v === "string") {
       try {
-        return normalizeTrackFeedRpcPayload(JSON.parse(raw));
+        v = JSON.parse(v);
       } catch (e) {
         return [];
       }
     }
-    if (Array.isArray(raw)) return raw;
-    return [];
+    for (let d = 0; d < 6 && Array.isArray(v) && v.length === 1; d++) {
+      if (Array.isArray(v[0])) {
+        v = v[0];
+        continue;
+      }
+      break;
+    }
+    if (!Array.isArray(v)) return [];
+    return v;
   }
 
   function fetchTrackFeedRemoteRows() {
@@ -455,15 +463,16 @@
       .then((raw) => {
         const arr = normalizeTrackFeedRpcPayload(raw);
         return arr.map((row) => {
+          if (!row || typeof row !== "object") return null;
           const mid = row.major_id;
           const major = R.majors.find((m) => m.id === mid);
           return {
-            at: row.at,
-            name: row.name,
+            at: row.at != null ? String(row.at) : "",
+            name: row.name != null ? String(row.name) : "",
             majorName: major ? major.name : mid || "—",
             pct: 100,
           };
-        });
+        }).filter(Boolean);
       })
       .catch(() => []);
   }
@@ -473,18 +482,25 @@
     const listEl = el("track-feed-list");
     if (!panel || !listEl) return;
 
-    if (state.step !== 1) {
+    if (state.step > 2) {
       panel.classList.add("hidden");
       panel.setAttribute("aria-hidden", "true");
       return;
     }
 
-    const renderRows = (rows) => {
+    const renderRows = (rows, showEmptyHint) => {
       const sorted = rows
         .filter((r) => r && r.name && r.majorName)
         .slice()
         .sort((a, b) => new Date(b.at) - new Date(a.at));
       if (!sorted.length) {
+        if (showEmptyHint) {
+          panel.classList.remove("hidden");
+          panel.setAttribute("aria-hidden", "false");
+          listEl.innerHTML =
+            "<p class=\"track-feed-empty\">لا توجد صفوف بعد في القاعدة. أكمل الاستبيان حتى صفحة النتائج مرة واحدة، ثم ارجع هنا أو حدّث الصفحة.</p>";
+          return;
+        }
         panel.classList.add("hidden");
         panel.setAttribute("aria-hidden", "true");
         listEl.innerHTML = "";
@@ -516,13 +532,13 @@
     const localRows = readTrackFeedLocalRows();
     const cfg = getRemoteConfig();
     if (!cfg) {
-      renderRows(localRows);
+      renderRows(localRows, false);
       return;
     }
 
     fetchTrackFeedRemoteRows().then((remoteRows) => {
-      const merged = remoteRows.concat(localRows);
-      renderRows(merged);
+      const merged = (remoteRows || []).concat(localRows);
+      renderRows(merged, !!cfg);
     });
   }
 
@@ -1006,7 +1022,7 @@
     el(panels[n]).classList.remove("hidden");
     el("progress-fill").style.width = ((n + 1) / 4) * 100 + "%";
     if (n === 2) renderQuestions();
-    if (n === 1) refreshTrackFeedPanel();
+    if (n <= 2) refreshTrackFeedPanel();
     else {
       const fp = el("track-feed-panel");
       if (fp) {
