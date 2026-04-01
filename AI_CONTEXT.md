@@ -1,0 +1,82 @@
+# AI_CONTEXT — مشروع توجيه التخصصات (أم القرى)
+
+## الغرض
+
+واجهة ويب عربية (RTL) تسجّل **الاسم والبريد** ثم **مسار الثانوي** ثم **استبياناً** لاشتقاق مستوى تقديري واقتراح **أفضل 3 تخصصات** (من برامج بكالوريوس مرتبطة بكليات جامعة أم القرى) مع **نطاق راتب شهري تقديري** للسوق المحلي، مع إخلاء مسؤولية أن القبول والرواتب الفعلية خارج نطاق التطبيق.
+
+## REGISTRY_AND_ID_SYSTEM
+
+كل كيان منطقي له `id` ثابت في `data/registry-bundle.js` (`window.UQU_REGISTRY`). المنطق في `js/app.js` يقرأ هذه المعرفات فقط ولا يُنشئ تخصصات عشوائية خارج السجل.
+
+### مسارات الثانوي (`tracks`)
+
+كل مسار يملك `academicNature`: `STEM_HEAVY` | `HUMANITIES_HEAVY` | `MIXED` وحقول `natureLabelAr` / `natureBadgeAr` للواجهة.
+
+| المعرف | الوصف المختصر |
+|--------|----------------|
+| `TRACK_GEN` | المسار العام — MIXED |
+| `TRACK_SHAR` | المسار الشرعي — HUMANITIES_HEAVY |
+| `TRACK_BUS` | مسار إدارة الأعمال — HUMANITIES_HEAVY |
+| `TRACK_CSE` | مسار علوم الحاسب والهندسة — STEM_HEAVY |
+| `TRACK_HLT` | مسار الصحة والحياة — STEM_HEAVY |
+
+- **HUMANITIES_HEAVY**: يُستبعد من الاقتراح ما عليه `stemOnly: true`؛ أسئلة ذات `hideForTrackNature` تُخفى.
+- **STEM_HEAVY / MIXED**: استبيان كامل (مع ترتيب `meta.questionOrderSTEM` لـ STEM/MIXED).
+
+المصدر المفهومي: نظام مسارات المرحلة الثانوية (وزارة التعليم).
+
+### أنماط أكاديمية (`streams`)
+
+| المعرف | التسمية |
+|--------|---------|
+| `STREAM_SCI` | علمي كمي |
+| `STREAM_HEALTH` | صحي حيوي |
+| `STREAM_ENG_CS` | هندسة وتقنية |
+| `STREAM_BUS` | إداري ومالي |
+| `STREAM_HUM` | أدبي وإنسانيات |
+| `STREAM_SHAR` | شرعي وديني |
+
+### أسئلة الاستبيان (`questions`)
+
+كل سؤال له `id` و`axis` فريد يُجمَّع في `normalizeScores()`. يدعم `hint` و`hideForTrackNature`.
+
+تشمل المحاور الأساسية والإضافية: `quant`, `science`, `verbal`, `grades`, `applied`, `detail`, `stamina`, `stress`, `cs`, `lab`, `social`, `want_*`, وكذلك `efficacy`, `study_plan`, `data_literacy`, `logic_reason`, `analysis`, `english`, `creativity`, `argumentation`, `ethics_sensitivity`, `service_motivation`.
+
+**ترتيب العرض:** `meta.questionOrderHumanities` و`meta.questionOrderSTEM` في السجل.
+
+**ملاحظة:** استبيان واحد موحّد لجميع التخصصات؛ لا ملف أسئلة لكل تخصص.
+
+### التخصصات (`majors`)
+
+- `tracks[]`, `streams[]`, `stemOnly`, `difficulty`, `salarySarMonthly`, `sampleCourses`
+
+مصدر الأسماء: محاذاة مع `https://uqu.edu.sa/App/Degrees`.
+
+### جلسات متعددة وزوار (`js/app.js`)
+
+- **`VISITOR_ID_KEY`** (`uqu_visitor_instance_v1`): معرّف فريد لكل «زائر» في `sessionStorage`.
+- **`WIZARD_PREFIX` + visitorId**: مفتاح حفظ خطوات المعالج (`uqu_orientation_wizard_v3_<uuid>`) — مستخدم جديد = UUID جديد = بيانات لا تختلط مع الجلسة السابقة على **نفس المتصفح**.
+- **`?new=1` أو `?fresh=1`**: يحذف معرّف الزائر السابق وملف المعالج المرتبط، ثم يُنشئ زائراً جديداً (يُزال المعامل من شريط العنوان بـ `replaceState`).
+- **زر «دخول كمستخدم جديد»**: نفس فكرة جلسة زائر جديدة يدوياً.
+- **الترحية من المفتاح القديم:** لمرة واحدة يُقرأ `uqu_orientation_session_v2` إن وُجد ويُنقل للمفتاح الجديد.
+- **أجهزة مختلفة:** كل جهاز له `sessionStorage` مستقل — نفس الرابط لا يوحّد الجلسات بين الأجهزة.
+- سجلات `localStorage` (`uqu_orientation_leads`) تتضمّن الآن `visitorInstanceId` للتمييز عند التحليل المحلي.
+
+### المزامنة مع الواجهة
+
+- `syncAnswersFromDOM()`, `applyAnswersToRadios()`, `pruneAnswersToVisible()` كما في الكود.
+- `beforeunload` / `pageshow` للحفظ والمزامنة.
+
+### تسجيل المستخدم (محلي)
+
+- أول انتقال للاستبيان: `saveLead()` مع `leadSaved` لمنع التكرار في نفس جلسة الزائر.
+
+## الملفات
+
+- `index.html`, `css/styles.css`, `data/registry-bundle.js`, `js/app.js`
+- `README.md` — نشر GitHub Pages وجلسات متعددة
+- `.nojekyll` — لصفحات GitHub
+
+## تعديل لاحق متوافق مع السجل
+
+عند إضافة تخصص أو سؤال: سجّل في `registry-bundle.js` بمعرف فريد، وحدّث هذا الملف (استبدال الأقسام المتأثرة).

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>توجيه تخصصات — جامعة أم القرى (استبيان)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="brand">
+        <span class="logo">UQU</span>
+        <div>
+          <h1>مستكشف التخصص</h1>
+          <p class="tagline">استبيان ذكي مبني على مسارات الثانوي وبرامج جامعة أم القرى</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="btn-new-visitor" class="btn-header-secondary">
+          دخول كمستخدم جديد
+        </button>
+        <a class="link-out" href="https://uqu.edu.sa/App/Degrees" target="_blank" rel="noopener"
+          >برامج الجامعة الرسمية</a
+        >
+      </div>
+    </header>
+
+    <div class="progress-wrap" role="presentation">
+      <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+      <span class="progress-label">خطوات التوجيه</span>
+    </div>
+
+    <main class="shell">
+      <section id="panel-register" class="panel card">
+        <h2>1 — بياناتك</h2>
+        <p class="lead">
+          قبل الاستبيان نسجّل اسمك وبريدك. تُحفظ خطواتك والإجابات في
+          <strong>جلسة المتصفح</strong> (sessionStorage) لتفادي فقدان التقدم عند التحديث؛ زر «جلسة جديدة» يمسحها.
+        </p>
+        <form id="form-register" class="form-grid" novalidate autocomplete="off">
+          <label class="field">
+            <span>الاسم الكامل</span>
+            <input id="inp-name" name="name" type="text" autocomplete="off" required placeholder="مثال: فلان الفلاني" />
+          </label>
+          <label class="field">
+            <span>البريد الإلكتروني</span>
+            <input
+              id="inp-email"
+              name="email"
+              type="email"
+              autocomplete="off"
+              required
+              placeholder="name@example.com"
+            />
+          </label>
+          <button type="submit" class="btn primary wide">متابعة لاختيار المسار</button>
+        </form>
+      </section>
+
+      <section id="panel-track" class="panel card hidden">
+        <h2>2 — مسار الثانوي</h2>
+        <p class="lead">
+          حسب نظام مسارات المرحلة الثانوية في المملكة؛ التخصصات تُفلتر أولاً بما يناسب مسارك قبل حساب الملاءمة.
+        </p>
+        <div id="track-list" class="choice-list"></div>
+        <button type="button" id="btn-tracks-next" class="btn primary wide" disabled>ابدأ الاستبيان</button>
+      </section>
+
+      <section id="panel-survey" class="panel card hidden">
+        <h2>3 — قياس المستوى والميول</h2>
+        <p class="lead">
+          أجب بصدق؛ النتيجة تقترح أفضل ثلاثة تخصصات من برامج البكالوريوس في أم القرى مع تقدير راتب سوقي
+          <strong>غير ملزم</strong>. نوع الأسئلة وما إذا كنا نستبعد البرامج الشديدة علمياً يُشتقّان <strong>تلقائياً من مسار الثانوي</strong> الذي اخترته (إدارة أعمال / شرعي = إداري-أدبي في النموذج؛ حاسب-هندسة / صحة = علمي؛ عام = مختلط).
+        </p>
+        <div id="questions"></div>
+        <button type="button" id="btn-survey-submit" class="btn primary wide">عرض النتائج</button>
+      </section>
+
+      <section id="panel-results" class="panel card hidden">
+        <h2>4 — نتيجتك</h2>
+        <div class="result-summary">
+          <p><strong>الطالب:</strong> <span id="res-user"></span></p>
+          <p><strong>مسار الثانوي:</strong> <span id="res-track"></span></p>
+          <p id="res-stem" class="muted small"></p>
+          <p id="res-level" class="level-line"></p>
+        </div>
+        <div id="res-majors" class="major-list"></div>
+        <p id="res-confidence" class="muted small"></p>
+        <p class="disclaimer">
+          المصدر الأكاديمي للأسماء والساعات: صفحة
+          <a href="https://uqu.edu.sa/App/Degrees" target="_blank" rel="noopener">برامج الجامعة | أم القرى</a>.
+          الرواتب والملاءمة <strong>تقديرية</strong> للتوجيه فقط؛ القبول النهائي والاشتراطات من الجامعة والجهات المختصة.
+          حتى مع استبيان أطول، لا يوجد نموذج «شبه أكيد»؛ النتيجة تعتمد على صدق الإجابات ولا تحل محل الاختبارات أو معايير القبول الرسمية.
+        </p>
+        <button type="button" id="btn-restart" class="btn ghost wide">جلسة جديدة</button>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p id="visitor-session-hint" class="session-hint" aria-live="polite"></p>
+      <p>مشروع توجيه طلابي — بيانات السجل: <code>REGISTRY_AND_ID_SYSTEM</code> في <code>data/registry-bundle.js</code></p>
+      <p class="muted tiny">
+        كل جهاز أو متصفح له جلسة مستقلة. لشخص آخر على <strong>نفس الهاتف/الكمبيوتر</strong> اضغط «دخول كمستخدم جديد» أو افتح
+        الرابط مع <code>?new=1</code>
+      </p>
+    </footer>
+
+    <script src="data/registry-bundle.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
