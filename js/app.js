@@ -865,7 +865,13 @@
     if (major.streams.includes("STREAM_HEALTH") && s.wantHealth <= 0.34) penalty += 18;
     if (major.streams.includes("STREAM_ENG_CS") && s.wantEng <= 0.34 && s.cs < 0.45) penalty += 12;
     if (major.streams.includes("STREAM_BUS") && s.wantBus <= 0.34) penalty += 10;
-    if (major.streams.includes("STREAM_SHAR") && s.wantShar <= 0.34) penalty += 14;
+    /* QN_SHAR_INT → want_shar: رفض صريح (A=0) يجب أن يطغى على تقارب اللفظي/التحليلي لـ STREAM_SHAR */
+    if (major.streams.includes("STREAM_SHAR")) {
+      if (s.wantShar <= 0) penalty += 62;
+      else if (s.wantShar <= 0.34) penalty += 20;
+    }
+    /* QN_READ → verbal: «ليس مجال اهتمامي» (A)؛ MAJ_ARB لا يملك STREAM_SHAR في السجل فيُعاقَب هنا */
+    if (major.id === "MAJ_ARB" && s.verbal <= 0.34) penalty += 52;
     return penalty;
   }
 
