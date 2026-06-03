@@ -1250,8 +1250,15 @@
         "<p class=\"muted small\">" +
         (t.major.hoursNote || "") +
         "</p>" +
-        "<p><strong>مواد نموذجية من الخطة:</strong> " +
+        "<p><strong>مواد من الخطة الدراسية" +
+        (t.major.uquProgramTitle ? " (" + t.major.uquProgramTitle + ")" : "") +
+        ":</strong> " +
         t.major.sampleCourses.join("، ") +
+        (t.major.uquUrl
+          ? ' — <a href="' +
+            t.major.uquUrl +
+            '" target="_blank" rel="noopener">الخطة الكاملة على موقع الجامعة</a>'
+          : "") +
         "</p>" +
         "<p><strong>النمط الأكاديمي:</strong> " +
         streams +

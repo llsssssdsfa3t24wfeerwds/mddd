@@ -52,10 +52,17 @@
 
 مصدر الأسماء: محاذاة مع `https://uqu.edu.sa/App/Degrees`.
 
-### ملفات الملاءمة (`fitProfiles` في `registry-bundle.js`)
+### ربط أم القرى (`uquDegreeId` / `uquUrl` / `uquProgramTitle`)
 
-- كل تخصص يشير إلى `fitProfile` (مثل `FP_CS`, `FP_MED`) — أوزان محاور الاستبيان (مجموع كل ملف = 1) مبنية على **مواد نموذجية** وطبيعة البرنامج.
-- المحور في السجل يطابق مفتاح مخرجات `normalizeScores()` (`quant`, `wantHealth`, `dataLit`, …).
+- كل `majors[]` مربوط ببرنامج بكالوريوس في [برامج الجامعة](https://uqu.edu.sa/App/Degrees) عبر `uquDegreeId`.
+- `sampleCourses`: عيّنة من الخطة الدراسية (تُستبعد المواد الجامعية العامة مثل التجويد/الإنجليزية حيث أمكن).
+- `fitProfiles`: أوزان محاور الاستبيان تُشتق من تصنيف **كل مقررات** البرنامج (سكربت `scripts/build-uqu-registry-data.mjs` ثم `apply-uqu-to-registry.mjs`).
+- تحديث دوري: `node scripts/scrape-all-bachelor.mjs` ثم `build-uqu-registry-data.mjs` ثم `apply-uqu-to-registry.mjs`.
+
+### ملفات الملاءمة (`fitProfiles`)
+
+- كل تخصص → `fitProfile` (مثل `FP_CS`)؛ مجموع أوزان كل ملف = 1.
+- المفاتيح = مخرجات `normalizeScores()` (`quant`, `wantHealth`, `dataLit`, …).
 
 ### حساب النتيجة (`js/app.js`) — استبدال المنطق القديم
 
