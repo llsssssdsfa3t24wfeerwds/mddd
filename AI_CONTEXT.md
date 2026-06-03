@@ -48,15 +48,31 @@
 
 ### التخصصات (`majors`)
 
-- `tracks[]`, `streams[]`, `stemOnly`, `difficulty`, `salarySarMonthly`, `sampleCourses`
+- `tracks[]`, `streams[]`, `fitProfile`, `stemOnly`, `difficulty`, `salarySarMonthly`, `sampleCourses`
 
 مصدر الأسماء: محاذاة مع `https://uqu.edu.sa/App/Degrees`.
 
-### تطابق الاهتمام مع النتيجة (`interestFit` في `js/app.js`)
+### ملفات الملاءمة (`fitProfiles` في `registry-bundle.js`)
 
-- **`want_shar`** (سؤال `QN_SHAR_INT`، محور `want_shar`): تطبيع `score/3`. خيار **A** (`score: 0`) يعني رفضاً صريحاً للمسار الشرعي/اللغوي التراثي؛ عقوبة قوية على أي تخصص يضم **`STREAM_SHAR`** حتى لا يغلب تقارب `verbal`/`analysis`/`argumentation` على إجابة «لا يناسب توجّهي». خيارات **B** ذات التطبيع ≤0.34 تبقى بعقوبة أخف.
-- **`verbal`** (سؤال `QN_READ` عن العربية والنصوص): تطبيع `score/4`. عند الانخفاض (≤0.34، أي خيار **A** «ليس مجال اهتمامي الأكاديمي») تُضاف عقوبة على **`MAJ_ARB`** تحديداً لأن برنامج «اللغة العربية وآدابها» مسجّل بـ `STREAM_HUM` فقط وليس بـ `STREAM_SHAR`، فكان يظهر أحياناً رغم رفض المستخدم للمجال اللغوي.
-- المعرفات `MAJ_*` و`STREAM_*` تبقى من `registry-bundle.js`؛ المنطق لا يُنشئ تخصصات جديدة.
+- كل تخصص يشير إلى `fitProfile` (مثل `FP_CS`, `FP_MED`) — أوزان محاور الاستبيان (مجموع كل ملف = 1) مبنية على **مواد نموذجية** وطبيعة البرنامج.
+- المحور في السجل يطابق مفتاح مخرجات `normalizeScores()` (`quant`, `wantHealth`, `dataLit`, …).
+
+### حساب النتيجة (`js/app.js`) — استبدال المنطق القديم
+
+**حُذف:** `streamAffinity()` (أوزان عامة لـ `STREAM_*` ثم متوسطها) + نسبة الملاءمة **النسبية** `(score / أعلى score) × 100` (كانت تجعل #1 دائماً 100%).
+
+**الجديد:**
+
+1. **`subjectFitRatio(major, s)`** — جمع مرجّح لأوزان `fitProfile` × درجات المحاور **المُجاب عنها فقط** (`getAnsweredAxisSet()`؛ لا تُحسب أسئلة مخفية لمسار أدبي).
+2. **`tierFitMultiplier`** — يضرب الملاءمة حسب فرق `major.difficulty` و`userTier` (1–5).
+3. **`interestFit`** — عقوبات اهتمام (`want_shar`, `want_health`, …) تُطبَّق فقط إن وُجد سؤال المحور في الإجابات.
+4. **نسبة الملاءمة التقديرية** = النتيجة المطلقة 0–100% (ليست نسبية للمركز الأول).
+5. **`normalizeScores` / `userTier`:** المحاور المخفية (`hideForTrackNature`) لا تدخل في `cognitive` ولا في أوزان الملاءمة؛ لا قيم افتراضية مصطنعة لعلوم/برمجة في المسارات الأدبية.
+
+### تطابق الاهتمام (`interestFit`)
+
+- **`want_shar`**: رفض صريح (A=0) → عقوبة قوية على تخصصات `STREAM_SHAR`.
+- **`verbal` + `MAJ_ARB`**: انخفاض شديد في العربية → عقوبة على اللغة العربية وآدابها.
 
 ### جلسات متعددة وزوار (`js/app.js`)
 

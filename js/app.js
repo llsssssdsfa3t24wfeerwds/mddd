@@ -710,168 +710,231 @@
     });
   }
 
+  /** محاور أُجيب عنها فعلياً (سؤال ظاهر للمسار + إجابة محفوظة). */
+  function getAnsweredAxisSet() {
+    const axes = new Set();
+    R.questions.forEach((q) => {
+      if (!questionVisibleForNature(q)) return;
+      if (!state.answers[q.id]) return;
+      axes.add(q.axis);
+    });
+    return axes;
+  }
+
   function normalizeScores() {
     const a = state.answers;
-    const g = (axis, def) => {
+    const g = (axis, def, maxScore) => {
       const q = R.questions.find((x) => x.axis === axis);
-      if (!q || !a[q.id]) return def;
+      if (!q || !questionVisibleForNature(q)) return null;
+      if (!a[q.id]) return def / maxScore;
       const opt = q.options.find((o) => o.id === a[q.id]);
-      return opt ? opt.score : def;
+      return opt ? opt.score / maxScore : def / maxScore;
     };
 
-    const hum = appliesStemOnlyFilter();
+    const quant = g("quant", 2, 4);
+    const science = g("science", 2, 4);
+    const verbal = g("verbal", 2, 4);
+    const grades = g("grades", 2, 4);
+    const applied = g("applied", 2, 4);
+    const detail = g("detail", 2, 4);
+    const stamina = g("stamina", 2, 4);
+    const stress = g("stress", 2, 4);
+    const cs = g("cs", 1, 4);
+    const lab = g("lab", 2, 4);
+    const social = g("social", 2, 4);
+    const wantHealth = g("want_health", 1, 3);
+    const wantEng = g("want_eng", 1, 3);
+    const wantBus = g("want_bus", 1, 3);
+    const wantShar = g("want_shar", 1, 3);
 
-    const quant = g("quant", 2) / 4;
-    const science = hum ? 0.28 : g("science", 2) / 4;
-    const verbal = g("verbal", 2) / 4;
-    const grades = g("grades", 2) / 4;
-    const applied = g("applied", 2) / 4;
-    const detail = g("detail", 2) / 4;
-    const stamina = g("stamina", 2) / 4;
-    const stress = g("stress", 2) / 4;
-    const cs = hum ? 0.18 : g("cs", 1) / 4;
-    const lab = hum ? 0.22 : g("lab", 2) / 4;
-    const social = g("social", 2) / 4;
-    const wantHealth = hum ? 0 : g("want_health", 1) / 3;
-    const wantEng = hum ? 0 : g("want_eng", 1) / 3;
-    const wantBus = g("want_bus", 1) / 3;
-    const wantShar = g("want_shar", 1) / 3;
+    const efficacy = g("efficacy", 2, 4);
+    const studyPlan = g("study_plan", 2, 4);
+    const dataLit = g("data_literacy", 2, 4);
+    const logicR = g("logic_reason", 2, 4);
+    const analysis = g("analysis", 2, 4);
+    const english = g("english", 2, 4);
+    const creativity = g("creativity", 2, 4);
+    const argumentation = g("argumentation", 2, 4);
+    const ethics = g("ethics_sensitivity", 2, 4);
+    const service = g("service_motivation", 2, 4);
 
-    const efficacy = g("efficacy", 2) / 4;
-    const studyPlan = g("study_plan", 2) / 4;
-    const dataLit = g("data_literacy", 2) / 4;
-    const logicR = g("logic_reason", 2) / 4;
-    const analysis = g("analysis", 2) / 4;
-    const english = g("english", 2) / 4;
-    const creativity = g("creativity", 2) / 4;
-    const argumentation = g("argumentation", 2) / 4;
-    const ethics = g("ethics_sensitivity", 2) / 4;
-    const service = g("service_motivation", 2) / 4;
+    const cogParts = [
+      [quant, 0.12],
+      [science, 0.12],
+      [verbal, 0.07],
+      [cs, 0.07],
+      [lab, 0.06],
+      [grades, 0.1],
+      [applied, 0.04],
+      [detail, 0.04],
+      [efficacy, 0.08],
+      [dataLit, 0.06],
+      [logicR, 0.07],
+      [analysis, 0.06],
+      [english, 0.05],
+      [creativity, 0.03],
+      [argumentation, 0.03],
+    ];
+    let cogSum = 0;
+    let cogW = 0;
+    cogParts.forEach(([val, w]) => {
+      if (val === null) return;
+      cogSum += val * w;
+      cogW += w;
+    });
+    const cognitive = cogW > 0 ? cogSum / cogW : 0.5;
 
-    const cognitive =
-      quant * 0.12 +
-      science * 0.12 +
-      verbal * 0.07 +
-      cs * 0.07 +
-      lab * 0.06 +
-      grades * 0.1 +
-      applied * 0.04 +
-      detail * 0.04 +
-      efficacy * 0.08 +
-      dataLit * 0.06 +
-      logicR * 0.07 +
-      analysis * 0.06 +
-      english * 0.05 +
-      creativity * 0.03 +
-      argumentation * 0.03;
+    const grindParts = [
+      [stamina, 0.42],
+      [stress, 0.42],
+      [studyPlan, 0.16],
+    ];
+    let grindSum = 0;
+    let grindW = 0;
+    grindParts.forEach(([val, w]) => {
+      if (val === null) return;
+      grindSum += val * w;
+      grindW += w;
+    });
+    const grind = grindW > 0 ? grindSum / grindW : 0.5;
 
-    const grind = stamina * 0.42 + stress * 0.42 + studyPlan * 0.16;
+    const gradesN = grades !== null ? grades : 0.5;
+    const efficacyN = efficacy !== null ? efficacy : 0.5;
+    const studyPlanN = studyPlan !== null ? studyPlan : 0.5;
 
     let userTier =
       1 +
-      cognitive * 1.92 +
-      grind * 1.08 +
-      (grades - 0.5) * 0.42 +
-      (efficacy - 0.5) * 0.48 +
-      (studyPlan - 0.5) * 0.35;
+      cognitive * 1.75 +
+      grind * 1.05 +
+      (gradesN - 0.5) * 0.55 +
+      (efficacyN - 0.5) * 0.45 +
+      (studyPlanN - 0.5) * 0.35;
     userTier = Math.max(1, Math.min(5, Math.round(userTier)));
 
+    const nz = (v, fallback) => (v === null ? fallback : v);
+
     return {
-      quant,
-      science,
-      verbal,
-      grades,
-      applied,
-      detail,
-      stamina,
-      stress,
-      cs,
-      lab,
-      social,
-      wantHealth,
-      wantEng,
-      wantBus,
-      wantShar,
-      efficacy,
-      studyPlan,
-      dataLit,
-      logicR,
-      analysis,
-      english,
-      creativity,
-      argumentation,
-      ethics,
-      service,
+      quant: nz(quant, 0.5),
+      science: nz(science, 0.5),
+      verbal: nz(verbal, 0.5),
+      grades: nz(grades, 0.5),
+      applied: nz(applied, 0.5),
+      detail: nz(detail, 0.5),
+      stamina: nz(stamina, 0.5),
+      stress: nz(stress, 0.5),
+      cs: nz(cs, 0.5),
+      lab: nz(lab, 0.5),
+      social: nz(social, 0.5),
+      wantHealth: nz(wantHealth, 0.5),
+      wantEng: nz(wantEng, 0.5),
+      wantBus: nz(wantBus, 0.5),
+      wantShar: nz(wantShar, 0.5),
+      efficacy: nz(efficacy, 0.5),
+      studyPlan: nz(studyPlan, 0.5),
+      dataLit: nz(dataLit, 0.5),
+      logicR: nz(logicR, 0.5),
+      analysis: nz(analysis, 0.5),
+      english: nz(english, 0.5),
+      creativity: nz(creativity, 0.5),
+      argumentation: nz(argumentation, 0.5),
+      ethics: nz(ethics, 0.5),
+      service: nz(service, 0.5),
       cognitive,
       grind,
       userTier,
     };
   }
 
-  function streamAffinity(major, s) {
-    const weights = {
-      STREAM_SCI:
-        s.quant * 0.32 +
-        s.science * 0.32 +
-        s.lab * 0.07 +
-        (1 - s.applied) * 0.06 +
-        s.logicR * 0.1 +
-        s.dataLit * 0.08 +
-        s.analysis * 0.05,
-      STREAM_HEALTH:
-        s.science * 0.24 +
-        s.social * 0.18 +
-        s.wantHealth * 0.32 +
-        s.detail * 0.1 +
-        s.ethics * 0.1 +
-        s.service * 0.06,
-      STREAM_ENG_CS:
-        s.quant * 0.18 +
-        s.cs * 0.32 +
-        s.science * 0.18 +
-        s.wantEng * 0.12 +
-        s.applied * 0.14 +
-        s.logicR * 0.1 +
-        s.dataLit * 0.06,
-      STREAM_BUS:
-        s.verbal * 0.18 +
-        s.wantBus * 0.42 +
-        s.quant * 0.16 +
-        s.detail * 0.09 +
-        s.dataLit * 0.08 +
-        s.english * 0.07,
-      STREAM_HUM:
-        s.verbal * 0.42 +
-        (1 - s.cs) * 0.12 +
-        s.social * 0.24 +
-        (1 - s.applied) * 0.05 +
-        s.creativity * 0.1 +
-        s.analysis * 0.07,
-      STREAM_SHAR:
-        s.verbal * 0.32 +
-        s.wantShar * 0.48 +
-        s.argumentation * 0.12 +
-        s.analysis * 0.08,
-    };
-    let sum = 0;
-    for (const sid of major.streams) {
-      sum += weights[sid] ?? 0;
-    }
-    return sum / major.streams.length;
+  const QUESTION_AXIS_TO_SCORE = {
+    quant: "quant",
+    science: "science",
+    verbal: "verbal",
+    grades: "grades",
+    applied: "applied",
+    detail: "detail",
+    stamina: "stamina",
+    stress: "stress",
+    cs: "cs",
+    lab: "lab",
+    social: "social",
+    want_health: "wantHealth",
+    want_eng: "wantEng",
+    want_bus: "wantBus",
+    want_shar: "wantShar",
+    efficacy: "efficacy",
+    study_plan: "studyPlan",
+    data_literacy: "dataLit",
+    logic_reason: "logicR",
+    analysis: "analysis",
+    english: "english",
+    creativity: "creativity",
+    argumentation: "argumentation",
+    ethics_sensitivity: "ethics",
+    service_motivation: "service",
+  };
+
+  const SCORE_TO_QUESTION_AXIS = {};
+  Object.keys(QUESTION_AXIS_TO_SCORE).forEach((qAxis) => {
+    SCORE_TO_QUESTION_AXIS[QUESTION_AXIS_TO_SCORE[qAxis]] = qAxis;
+  });
+
+  /** ملاءمة مواد التخصص: أوزان fitProfile × إجابات المحاور المُجاب عنها فقط (0–1). */
+  function subjectFitRatio(major, s) {
+    const profiles = R.fitProfiles;
+    const weights = major.fitProfile && profiles ? profiles[major.fitProfile] : null;
+    if (!weights) return 0.5;
+
+    const answered = getAnsweredAxisSet();
+    let wSum = 0;
+    let acc = 0;
+
+    Object.keys(weights).forEach((scoreKey) => {
+      const w = weights[scoreKey];
+      if (typeof w !== "number" || w <= 0) return;
+      const qAxis = SCORE_TO_QUESTION_AXIS[scoreKey];
+      if (!qAxis || !answered.has(qAxis)) return;
+      const val = s[scoreKey];
+      if (typeof val !== "number") return;
+      wSum += w;
+      acc += w * val;
+    });
+
+    if (wSum < 1e-6) return 0.45;
+    return acc / wSum;
   }
 
-  function interestFit(major, s) {
+  function tierFitMultiplier(major, s) {
+    const diff = major.difficulty - s.userTier;
+    if (diff >= 2) return 0.7;
+    if (diff === 1) return 0.86;
+    if (diff === 0) return 1;
+    if (diff === -1) return 0.96;
+    return 0.9;
+  }
+
+  function interestFit(major, s, answered) {
     let penalty = 0;
-    if (major.streams.includes("STREAM_HEALTH") && s.wantHealth <= 0.34) penalty += 18;
-    if (major.streams.includes("STREAM_ENG_CS") && s.wantEng <= 0.34 && s.cs < 0.45) penalty += 12;
-    if (major.streams.includes("STREAM_BUS") && s.wantBus <= 0.34) penalty += 10;
-    /* QN_SHAR_INT → want_shar: رفض صريح (A=0) يجب أن يطغى على تقارب اللفظي/التحليلي لـ STREAM_SHAR */
-    if (major.streams.includes("STREAM_SHAR")) {
-      if (s.wantShar <= 0) penalty += 62;
-      else if (s.wantShar <= 0.34) penalty += 20;
+    const has = (axis) => answered.has(axis);
+
+    if (major.streams.includes("STREAM_HEALTH") && has("want_health") && s.wantHealth <= 0.34) {
+      penalty += 22;
     }
-    /* QN_READ → verbal: «ليس مجال اهتمامي» (A)؛ MAJ_ARB لا يملك STREAM_SHAR في السجل فيُعاقَب هنا */
-    if (major.id === "MAJ_ARB" && s.verbal <= 0.34) penalty += 52;
+    if (
+      major.streams.includes("STREAM_ENG_CS") &&
+      has("want_eng") &&
+      s.wantEng <= 0.34 &&
+      (!has("cs") || s.cs < 0.45)
+    ) {
+      penalty += 14;
+    }
+    if (major.streams.includes("STREAM_BUS") && has("want_bus") && s.wantBus <= 0.34) {
+      penalty += 12;
+    }
+    if (major.streams.includes("STREAM_SHAR") && has("want_shar")) {
+      if (s.wantShar <= 0) penalty += 55;
+      else if (s.wantShar <= 0.34) penalty += 18;
+    }
+    if (major.id === "MAJ_ARB" && has("verbal") && s.verbal <= 0.34) penalty += 48;
     return penalty;
   }
 
@@ -881,25 +944,34 @@
 
     if (appliesStemOnlyFilter() && major.stemOnly === true) return -1;
 
-    const tierDiff = Math.abs(major.difficulty - s.userTier);
-    let base = 100 - tierDiff * 11;
-    base += streamAffinity(major, s) * 36;
-    base -= interestFit(major, s);
+    const answered = getAnsweredAxisSet();
+    let base = subjectFitRatio(major, s) * 100 * tierFitMultiplier(major, s);
+    base -= interestFit(major, s, answered);
 
-    if (major.difficulty >= 4 && s.grind < 0.45) base -= 14;
-    if (major.difficulty >= 4 && s.studyPlan < 0.4) base -= 6;
-    if (major.difficulty >= 4 && s.efficacy < 0.4) base -= 5;
-    if (major.id === "MAJ_MLS" && s.detail < 0.45) base -= 8;
-    if (major.streams.includes("STREAM_BUS") && (major.id === "MAJ_ACC" || major.id === "MAJ_ECO")) {
-      if (s.detail < 0.4) base -= 6;
-      if (s.dataLit < 0.4) base -= 5;
+    if (major.difficulty >= 4 && s.grind < 0.45) base -= 12;
+    if (major.difficulty >= 4 && s.studyPlan < 0.4) base -= 5;
+    if (major.difficulty >= 4 && s.efficacy < 0.4) base -= 4;
+    if (major.id === "MAJ_MLS" && answered.has("detail") && s.detail < 0.45) base -= 8;
+    if (
+      (major.id === "MAJ_ACC" || major.id === "MAJ_ECO") &&
+      answered.has("detail") &&
+      s.detail < 0.4
+    ) {
+      base -= 6;
     }
-    if (major.id === "MAJ_LAW" && s.argumentation < 0.4) base -= 12;
-    if (major.id === "MAJ_DES" && s.creativity < 0.4) base -= 12;
-    if (major.streams.includes("STREAM_HEALTH") && s.ethics < 0.35) base -= 8;
-    if (major.streams.includes("STREAM_HEALTH") && s.service < 0.35) base -= 5;
+    if ((major.id === "MAJ_ACC" || major.id === "MAJ_ECO") && answered.has("data_literacy") && s.dataLit < 0.4) {
+      base -= 5;
+    }
+    if (major.id === "MAJ_LAW" && answered.has("argumentation") && s.argumentation < 0.4) base -= 10;
+    if (major.id === "MAJ_DES" && answered.has("creativity") && s.creativity < 0.4) base -= 10;
+    if (major.streams.includes("STREAM_HEALTH") && answered.has("ethics_sensitivity") && s.ethics < 0.35) {
+      base -= 6;
+    }
+    if (major.streams.includes("STREAM_HEALTH") && answered.has("service_motivation") && s.service < 0.35) {
+      base -= 4;
+    }
 
-    return base;
+    return Math.max(0, Math.min(100, Math.round(base)));
   }
 
   function topMajors(s) {
@@ -911,11 +983,10 @@
     if (!scored.length) return [];
 
     const top = scored.slice(0, 3);
-    const max = top[0].score;
     return top.map((x) => ({
       major: x.m,
       raw: x.score,
-      pct: max > 0 ? Math.round((x.score / max) * 100) : 0,
+      pct: x.score,
     }));
   }
 
