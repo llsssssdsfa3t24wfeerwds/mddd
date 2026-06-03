@@ -1,0 +1,483 @@
+7.175 12.8231 116.97 12.7321 116.822 12.5237C116.712 12.3681 116.612 12.2067 116.505 12.0502C116.256 11.6882 116 11.3321 115.731 10.9857C115.62 10.8439 115.505 10.704 115.393 10.5631C115.39 10.5592 115.386 10.5553 115.378 10.5465C115.377 10.5631 115.376 10.5748 115.376 10.5866C115.376 11.0347 115.376 11.4837 115.376 11.9318C115.376 12.3994 115.375 12.8661 115.374 13.3338C115.374 13.4668 115.377 13.6008 115.376 13.7349C115.376 13.8268 115.374 13.9198 115.342 14.0088C115.265 14.2182 115.118 14.3493 114.901 14.3933C114.62 14.4491 114.352 14.2808 114.258 14.0245C114.224 13.9325 114.218 13.8356 114.218 13.7388C114.218 13.2398 114.22 12.7419 114.22 12.2439C114.221 12.0003 114.221 11.7567 114.22 11.5131C114.22 11.202 114.218 10.8908 114.218 10.5797C114.218 10.5709 114.218 10.5611 114.218 10.5523L114.211 10.5504C114.178 10.5905 114.145 10.6306 114.112 10.6707C113.828 11.0239 113.555 11.3839 113.296 11.7537C113.127 11.9964 112.961 12.2419 112.797 12.4885C112.705 12.6274 112.586 12.7282 112.422 12.7683C112.116 12.8426 111.8 12.6489 111.729 12.3398C111.69 12.1676 111.724 12.0091 111.819 11.8633C111.952 11.6598 112.087 11.4583 112.225 11.2577C112.515 10.8351 112.821 10.4232 113.142 10.0231C113.21 9.93697 113.28 9.85185 113.35 9.76576C113.353 9.76086 113.356 9.75597 113.363 9.74619Z" fill="white"/>
+</svg>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<div x-data>
+    <span wrapper="wrapper" class="contents contents" x-data="dialog(false, &#039;uqu-search-dialog&#039;, true)"><template x-teleport="body">
+        <div
+            x-cloak
+            x-show="isDialogOpen"
+            x-ref="dialog"
+            class="fixed inset-0 z-[var(--z-dialog)]"
+    >
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-black/50 fi-modal-close-overlay" x-show="isDialogOpen"
+              x-on:click="close"               x-transition.opacity.duration.250ms         ></div>
+
+        <!-- Panel -->
+        <div class="relative flex flex-col h-full pointer-events-none w-full items-center px-2 box-border justify-center"
+             x-show="isDialogOpen"
+              x-transition.duration.250ms         >
+            <div class="grow max-h-3 pointer-events-none">&nbsp;</div>
+            <div :id=" `overlay-${overlayId}`"
+                 x-trap.noscroll="isDialogOpen"
+                 tabindex="0"
+                 x-on:keydown.escape.stop="close"
+                    role="dialog" class="relative group/dialog box-border w-full flex pointer-events-auto max-h-[calc(100dvh-12px)] min-h-20 max-sm:max-w-full max-sm:min-w-full flex-col overflow-hidden rounded-lg bg-white p-6 overflow-y-auto  sm:max-w-[min(56rem,calc(100vw-1rem))]"
+            >
+                                    <div class="absolute top-3.5 end-3.5 z-10">
+                        <button class="group/button group/arrow-parent relative font-medium cursor-pointer flex-none disabled:cursor-default border-solid border [&amp;.loading&gt;*:not([data-slot=loading])]:opacity-0 rounded-sm text-sm inline-flex items-center justify-center flex-none  size-8 [&amp;_svg]:size-5  text-black hover:bg-gray-100 active:bg-gray-200 aria-checked:bg-gray-200 aria-selected:bg-gray-200 focus-visible:outline-black focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:text-gray-400 disabled:bg-transparent border-transparent" type="button" aria-label="close" data-close-button="data-close-button" x-on:click="close"><svg class="flex-none" data-slot="icon" data-name="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L12 12M12 12L6 18M12 12L18 18M12 12L6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" /></svg>            
+                        <svg class="flex-none [&amp;&gt;path]:animate-spin hidden [:where(&amp;)]:absolute [&amp;&gt;path]:origin-center group-[.loading]/button:block text-primary-600" data-slot="loading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.001 20C16.3295 21.2558 14.2516 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 12.8634 21.8906 13.7011 21.6849 14.5003C21.4617 15.3673 20.5145 15.77 19.6699 15.4728C18.9519 15.2201 18.6221 14.3997 18.802 13.66C18.9314 13.1279 19 12.572 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C13.3197 19 14.554 18.6348 15.6076 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" /></svg></button>
+
+                    </div>
+                                <header class="flex flex-col gap-y-2 pe-10">
+    <span
+    data-size="md"
+    data-color="gray"
+    data-variant="light"
+    data-circle="true"
+    class="inline-flex items-center justify-center rounded-sm flex-none *:scale-50 data-[variant=outline]:border data-[circle=true]:rounded-full data-[size=sm]:size-8 data-[size=sm]:*:size-full data-[size=md]:size-10 data-[size=md]:*:size-full data-[size=lg]:size-12 data-[size=lg]:*:size-full data-[size=xl]:size-14 data-[size=xl]:*:size-full data-[size=2xl]:size-20 data-[size=2xl]:*:size-full data-[size=3xl]:size-24 data-[size=3xl]:*:size-full data-[size=4xl]:size-32 data-[size=4xl]:*:size-full data-[color=brand]:data-[variant=light]:bg-primary-50 data-[color=brand]:data-[variant=light]:text-primary-600 data-[color=gray]:data-[variant=light]:bg-gray-50 data-[color=gray]:data-[variant=light]:text-black data-[color=error]:data-[variant=light]:bg-red-50 data-[color=error]:data-[variant=light]:text-red-700 data-[color=success]:data-[variant=light]:bg-green-50 data-[color=success]:data-[variant=light]:text-green-700 data-[color=warning]:data-[variant=light]:bg-yellow-50 data-[color=warning]:data-[variant=light]:text-yellow-700 data-[color=info]:data-[variant=light]:bg-blue-50 data-[color=info]:data-[variant=light]:text-blue-700 data-[color=brand]:data-[variant=outline]:border-primary-600 data-[color=brand]:data-[variant=outline]:text-primary-600 data-[color=gray]:data-[variant=outline]:border-gray-300 data-[color=gray]:data-[variant=outline]:text-black data-[color=error]:data-[variant=outline]:border-red-700 data-[color=error]:data-[variant=outline]:text-red-700 data-[color=success]:data-[variant=outline]:border-green-700 data-[color=success]:data-[variant=outline]:text-green-700 data-[color=warning]:data-[variant=outline]:border-yellow-700 data-[color=warning]:data-[variant=outline]:text-yellow-700 data-[color=info]:data-[variant=outline]:border-blue-700 data-[color=info]:data-[variant=outline]:text-blue-700 data-[variant=dark]:text-white data-[color=brand]:data-[variant=dark]:bg-primary-600 data-[color=gray]:data-[variant=dark]:bg-gray-400 data-[color=error]:data-[variant=dark]:bg-red-600 data-[color=success]:data-[variant=dark]:bg-green-600 data-[color=warning]:data-[variant=dark]:bg-yellow-600 data-[color=info]:data-[variant=dark]:bg-blue-600" data-name="icon">
+    <svg class="flex-none" data-slot="icon" data-name="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M17 17L21 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" /><path d="M19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19C15.4183 19 19 15.4183 19 11Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" /></svg>    
+</span>
+
+    <h2
+        :id="`${overlayId}-title`"
+        class="text-lg font-semibold text-black pb-2" data-name="title"
+>
+    البحث في الموقع
+</h2>
+
+
+    
+    
+</header>
+
+            <div data-dialog-body class="flex flex-col pb-4.5 last:pb-0 font-normal">
+    <form action="https://uqu.edu.sa/App/Search" method="get" id="cse-search-box">
+                    <input type="hidden" name="cx" value="partner-pub-3109343787262251:9jb5gy-ltyf"/>
+                    <input type="hidden" name="cof" value="FORID:10"/>
+                    <input type="hidden" name="ie" value="UTF-8"/>
+                    <div class="flex gap-2 items-end">
+                        <div class="group/input flex items-stretch border relative overflow-hidden rounded-md focus-within:not-has-[input[readonly]]:after:scale-x-100 has-[button[aria-expanded=true]]:after:scale-x-100 focus-within:not-has-[input[readonly]]:bg-white focus-within:not-has-[input[readonly]]:shadow-md bg-white border-gray-400 [&amp;:not(:has(input:disabled)):not(:has(input[readonly])):hover]:border-gray-700 [&amp;:has([data-slot=control][disabled])]:bg-transparent [&amp;:has([data-slot=control][disabled])]:border-gray-300 after:absolute after:h-0.5 after:bottom-0 after:inset-x-0 after:scale-x-0 after:transition after:bg-black w-full sm:[:where(&amp;)]:max-w-xs h-10 text-md [&amp;_svg]:size-5 [&amp;_svg]:text-black [&amp;_svg]:absolute [&amp;_svg[data-name=leadingIcon]]:start-4 [&amp;_svg[name=leadingIcon]]:opacity-0 **:data-[name=leadingIcon]:start-3 **:data-[name=trailingIcon]:end-3 **:data-[slot=loading]:start-3">
+
+            
+            <div class="relative flex items-center w-full rounded-[inherit]">
+
+             
+
+                
+                <input x-bind:id="typeof fieldId !== 'undefined' ? fieldId : null" x-bind:aria-labelledby="typeof fieldId !== 'undefined' ? `${fieldId}-label` : null" x-bind:aria-describedby="typeof fieldId !== 'undefined' ? `${fieldId}-description` : null" data-slot="control" class="peer/input w-full h-full transition-none [&amp;::-webkit-search-cancel-button]:hidden text-start truncate placeholder:text-gray-500 text-black font-regular border-none focus:border-0 m-0 shadow-none focus:shadow-none focus:outline-none focus:ring-0 rounded-[inherit] disabled:text-gray-400 disabled:placeholder:text-gray-400   ps-(--ps-li,1rem) pe-(--pe-ti,0.5rem) has-[[data-multiple-value=true]]:px-0" type="text" name="q" />
+
+                
+            </div>
+
+            
+
+        </div>
+
+                        <button class="group/button group/arrow-parent relative font-medium cursor-pointer flex-none disabled:cursor-default border-solid border [&amp;.loading&gt;*:not([data-slot=loading])]:opacity-0 rounded-sm text-md inline-flex items-center justify-center  h-10 min-w-10 px-4 gap-1  [&amp;_svg]:size-6  bg-gray-950 text-white hover:bg-gray-800 active:bg-gray-600 aria-checked:bg-gray-700 aria-selected:bg-gray-700 focus-visible:outline-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:inset-ring-2 focus-visible:inset-ring-white disabled:bg-gray-200 disabled:text-gray-400 border-transparent" type="submit" name="sa"><span data-slot="text" >البحث</span>
+                            
+                        <svg class="flex-none [&amp;&gt;path]:animate-spin hidden [:where(&amp;)]:absolute [&amp;&gt;path]:origin-center group-[.loading]/button:block text-primary-600" data-slot="loading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.001 20C16.3295 21.2558 14.2516 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 12.8634 21.8906 13.7011 21.6849 14.5003C21.4617 15.3673 20.5145 15.77 19.6699 15.4728C18.9519 15.2201 18.6221 14.3997 18.802 13.66C18.9314 13.1279 19 12.572 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C13.3197 19 14.554 18.6348 15.6076 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" /></svg></button>
+
+                    </div>
+                </form>
+</div>
+            </div>
+            <div class="grow max-h-[15vh] pointer-events-none">&nbsp;</div>
+        </div>
+    </div>
+    </template></span>
+</div>
+
+<div class="tailwind">
+    <section x-data="toaster" aria-label="Notifications alt+T"
+             tabindex="-1"
+             class="fixed bottom-0 max-sm:-translate-x-1/2 max-sm:left-1/2 sm:top-0 sm:end-0 p-12 w-full pointer-events-none max-w-sm z-(--z-toast)">
+        <ol
+                wire:ignore
+                x-on:uqu-toast.window="handleEvent($event)"
+                tabindex="-1"
+                class="flex m-0 pointer-events-auto p-0 gap-y-2 list-none relative"
+                x-on:mouseenter="expanded = true"
+                x-on:mouseleave="expanded = false"
+                x-on:focusin="expanded = true"
+                x-on:focusout="expanded = false"
+        >
+            <template x-for="toast in showingToasts" :key="toast.id">
+                <li :id="toast.id"
+                    x-init="animateEnter($el)"
+                    aria-live="polite"
+                    aria-atomic="true" role="status" tabindex="0"
+                    class="absolute inset-x-0 py-1 bottom-0 sm:top-0"
+                >
+                    <div class="bg-white rounded-lg">
+                    <div class="w-full isolate relative group/toast flex gap-x-2 py-3 pe-3 ps-4 items-center grow min-h-[60px] justify-start font-kufi text-[0.813rem] font-semibold border-solid border rounded-lg shadow-[0_4px_12px_#0000001a] text-gray-700"
+                         :class="{
+                            'bg-red-50/50 border-red-300/50': toast.type === 'danger' || toast.type === 'error',
+                            'bg-primary-50/50 border-primary-300/50': toast.type === 'success',
+                            'bg-blue-50/50 border-blue-300/50': toast.type === 'info',
+                            'bg-yellow-50/50 border-yellow-300/50': toast.type === 'warning',
+                            'bg-white border-gray-300/50': toast.type === 'default' || toast.type === 'processing',
+                        }"
+                    >
+
+                        <button class="group/button group/arrow-parent relative border-solid border font-kufi font-semibold [&amp;.loading&gt;*:not([data-slot=loading])]:opacity-0 disabled:opacity-50 no-underline transition-none  inline-flex items-center justify-center flex-none  size-[1.375rem]  rounded-full **:data-[slot=icon]:size-3  bg-white! enabled-or-not-button:hover:!bg-gray-50 text-gray-800 hover:text-gray-800 border-gray-200 enabled:hover:border-gray-300/70 not-btn:hover:border-gray-300/70 shadow-sm shadow-gray-600/5  [&amp;_[data-slot=loading]]:size-3.5 !absolute opacity-0 focus-visible:opacity-100 group-hover/toast:opacity-100 bg-white enabled:hover:!bg-white end-1 top-1 -translate-y-1/2 rtl:-translate-x-1/2 ltr:translate-x-1/2" type="button" aria-label="close" x-on:click="close(toast.id)"><svg class="flex-none" data-slot="icon" width="24" height="24" data-name="icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M345 137c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-119 119L73 103c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l119 119L39 375c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l119-119L311 409c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-119-119L345 137z"/></svg>                        <svg class="flex-none [&amp;&gt;path]:animate-spin hidden [:where(&amp;)]:absolute [&amp;&gt;path]:origin-center group-[.loading]/button:block" data-slot="loading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.001 20C16.3295 21.2558 14.2516 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 12.8634 21.8906 13.7011 21.6849 14.5003C21.4617 15.3673 20.5145 15.77 19.6699 15.4728C18.9519 15.2201 18.6221 14.3997 18.802 13.66C18.9314 13.1279 19 12.572 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C13.3197 19 14.554 18.6348 15.6076 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" /></svg></button>
+
+
+                        <div class="flex items-start gap-x-2 grow">
+                            <template x-if="toast.type === 'danger'">
+                                <svg data-has-size="true" class="size-4 flex-none flex-none text-red-700" data-slot="icon" width="24" height="24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>                            </template>
+
+                            <template x-if="toast.type === 'success'">
+                                <svg data-has-size="true" class="size-4 flex-none flex-none text-emerald-700" data-slot="icon" width="24" height="24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>                            </template>
+
+                            <template x-if="toast.type === 'info'">
+                                <svg data-has-size="true" class="size-4 flex-none flex-none text-blue-700" data-slot="icon" width="24" height="24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>                            </template>
+
+                            <template x-if="toast.type === 'warning'">
+                                <svg data-has-size="true" class="size-4 flex-none flex-none text-yellow-700" data-slot="icon" width="24" height="24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>                            </template>
+                            <template x-if="toast.type === 'processing'">
+                                <svg data-has-size="true" class="size-4 flex-none [&amp;&gt;path]:animate-spin hidden [:where(&amp;)]:absolute [&amp;&gt;path]:origin-center text-gray-700 !relative !block" data-slot="loading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.001 20C16.3295 21.2558 14.2516 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 12.8634 21.8906 13.7011 21.6849 14.5003C21.4617 15.3673 20.5145 15.77 19.6699 15.4728C18.9519 15.2201 18.6221 14.3997 18.802 13.66C18.9314 13.1279 19 12.572 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C13.3197 19 14.554 18.6348 15.6076 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" /></svg>                            </template>
+
+                            
+                            
+                            
+
+                            <template x-if="toast.type !== 'processing'">
+                                <div class="flex flex-col gap-y-1 w-full">
+                                    <span class="leading-4" x-text="toast.message"></span>
+                                    <template x-if="toast.description">
+                                    <span class="leading-4 font-xs font-medium text-gray-500"
+                                          x-text="toast.description"></span>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="toast.type === 'processing'">
+                                <div class="flex flex-col gap-y-1 w-full">
+                                    <span class="leading-4">جاري المعالجة</span>
+                                </div>
+                            </template>
+
+                        </div>
+
+                        <template x-if="toast.action">
+                            <button class="group/button group/arrow-parent relative border-solid border font-kufi font-semibold [&amp;.loading&gt;*:not([data-slot=loading])]:opacity-0 disabled:opacity-50 no-underline transition-none text-[0.8125rem] inline-flex items-center justify-center  h-8 min-w-8 px-2.5 gap-1.5  rounded-md  **:data-[slot=icon]:size-3  enabled-or-not-button:bg-gray-500/10! enabled-or-not-button:hover:bg-gray-500/15! disabled:saturate-[0.7] text-gray-800 hover:text-gray-800 data-[dark-text]:text-gray-300 border-transparent  [&amp;_[data-slot=text]]:px-px [&amp;_[data-slot=loading]]:size-3.5" type="button" x-on:click="$fb(toast.action.onClick(toast), toast.close)"><span data-slot="text" class="has-[[data-has-value]]:contents"><span x-text="toast.action.label"></span></span>
+                                        <svg class="flex-none [&amp;&gt;path]:animate-spin hidden [:where(&amp;)]:absolute [&amp;&gt;path]:origin-center group-[.loading]/button:block" data-slot="loading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.001 20C16.3295 21.2558 14.2516 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 12.8634 21.8906 13.7011 21.6849 14.5003C21.4617 15.3673 20.5145 15.77 19.6699 15.4728C18.9519 15.2201 18.6221 14.3997 18.802 13.66C18.9314 13.1279 19 12.572 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C13.3197 19 14.554 18.6348 15.6076 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" /></svg></button>
+
+                        </template>
+                    </div>
+                    </div>
+                </li>
+            </template>
+        </ol>
+            </section>
+</div>
+
+<script  data-navigate-once="true">window.livewireScriptConfig = {"csrf":"VUt56V0DABM9TvunX7ow9zFJTTWLUKw8T16VgLAu","uri":"https:\/\/uqu.edu.sa\/livewire\/update","moduleUrl":"https:\/\/uqu.edu.sa\/livewire-fb707c7b","progressBar":"","nonce":""};</script>
+
+        <script>
+            const SelectComponent = () => ({
+                query: '',
+                searchInputFocused: false,
+                init() {
+                    this.$watch('open', this.handleOpenChange.bind(this))
+                },
+                handleOpenChange(value) {
+                    this.$nextTick(() => {
+                        if (!value) {
+                            this.query = '';
+                            return
+                        }
+                    })
+                }
+            });
+        </script>
+        <script>
+        const AdmissionComponent = () => ({
+            majors: [],
+            searchedMajors: [],
+            open: false,
+            selectedProgram: null,
+            majorsLoading: false,
+        })
+
+        const AdmissionProgramsComponent = (programs, filters) => ({
+            programs: programs,
+            filteredPrograms: programs,
+            filters: filters,
+            selectedFilters: {
+                gender: undefined,
+                is_saudi: 1,
+                is_payment: 0
+            },
+            init() {
+                this.filterThroughPrograms()
+                if (this.checkNoProgramsForTheSelectedFilters()) {
+                    this.filteredPrograms.is_payment = 1
+                    this.filterThroughPrograms()
+                    if (this.checkNoProgramsForTheSelectedFilters()) {
+                        this.filteredPrograms.is_saudi = 0
+                        this.filteredPrograms.is_payment = 0
+                        this.filterThroughPrograms()
+                        if (this.checkNoProgramsForTheSelectedFilters()) {
+                            this.filteredPrograms.is_saudi = 0
+                            this.filteredPrograms.is_payment = 1
+                            this.filterThroughPrograms()
+                        }
+                    }
+                }
+                this.$watch('open', (val) => {
+                    if (val) {
+                        this.majors = []
+                        this.searchedMajors = []
+                    }
+                })
+                this.$watch('selectedFilters', this.filterThroughPrograms.bind(this))
+            },
+            selectedFilterChange(name, value) {
+                this.selectedFilters[name] = value
+                this.filterThroughPrograms()
+            },
+            filterThroughPrograms() {
+                this.filteredPrograms = {
+                    ...this.programs
+                }
+                Object.keys(this.filteredPrograms).map(key => this.filteredPrograms[key] = this.filteredPrograms[key].filter(program => {
+                    return Object.keys(this.filters).every(filter => this.checkFilter(filter, program))
+                }))
+                this.checkNoProgramsForTheSelectedFilters()
+            },
+            checkFilter(filter, program) {
+                if (filter === 'is_saudi' && program['is_saudi'] === 2) {
+                    return true
+                }
+                return (this.selectedFilters[filter] == undefined || program[filter] == this.selectedFilters[filter])
+            },
+            checkNoProgramsForTheSelectedFilters() {
+                return Object.entries(this.programs).length > 0 && Object.entries(this.filteredPrograms).every(pr => pr[1].length === 0)
+            },
+            async getProgramMajors(program) {
+                this.open = true
+                this.majorsLoading = true
+                this.selectedProgram = program
+                const res = await fetch(`${EvoUrl}App/Admission/ProgramMajors/${program.semester}/${program.determinant_code}`)
+                const data = await res.json()
+                this.majorsLoading = false
+                this.majors = data.majors
+                this.searchedMajors = data.majors
+                console.log(data.majors)
+            }
+        });
+    </script>
+<script>
+        window.filamentData = []    </script>
+
+            
+            <script
+                src="https://static.uqu.edu.sa/js/filament/actions/actions.js?v=5.6.6.0"
+                
+                
+                
+                
+                
+                
+            ></script>
+        
+                
+            <script
+                src="https://static.uqu.edu.sa/js/filament/notifications/notifications.js?v=5.6.6.0"
+                
+                
+                
+                
+                
+                
+            ></script>
+        
+                
+            <script
+                src="https://static.uqu.edu.sa/js/filament/schemas/schemas.js?v=5.6.6.0"
+                
+                
+                
+                
+                
+                
+            ></script>
+        
+                
+            <script
+                src="https://static.uqu.edu.sa/js/filament/support/support.js?v=5.6.6.0"
+                
+                
+                
+                
+                
+                
+            ></script>
+        
+                
+            <script
+                src="https://static.uqu.edu.sa/js/filament/tables/tables.js?v=5.6.6.0"
+                
+                
+                
+                
+                
+                
+            ></script>
+        
+                            
+            <script
+                src="https://static.uqu.edu.sa/js/app/filament/rich-editor-integration.js?v=v3.0.306"
+                
+                
+                
+                
+                
+                
+            ></script>
+        
+    
+<style>
+    :root {
+            }
+
+    </style>
+<script
+    src="https://static.uqu.edu.sa/assets/UQU-UI/ar/js/app.light.min.js?v=v3.0.306"></script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a05e8f5c7b02cd8f',t:'MTc4MDQ4ODI2Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    <div
+            aria-labelledby="curator-panel.heading"
+        aria-modal="true"
+    id="curator-panel"
+    role="dialog"
+    x-data="filamentModal({
+                id: 'curator-panel',
+            })"
+            data-fi-modal-id="curator-panel"
+        x-on:close-modal.window="if (($event.detail.id === 'curator-panel') && isOpen) close()"
+        x-on:close-modal-quietly.window="if (($event.detail.id === 'curator-panel') && isOpen) closeQuietly()"
+        x-on:open-modal.window="if (($event.detail.id === 'curator-panel') && (! isOpen)) open()"
+        x-bind:class="{
+        'fi-modal-open': isOpen,
+    }"
+    x-cloak
+    x-show="isOpen"
+    x-trap.noscroll="isOpen"
+    class="fi-modal fi-absolute-positioning-context fi-modal-has-sticky-header fi-modal-has-sticky-footer fi-width-screen"
+>
+    <div
+        aria-hidden="true"
+        x-show="isOpen"
+        x-transition.duration.300ms.opacity
+        class="fi-modal-close-overlay"
+    ></div>
+
+    <div
+                class="fi-modal-window-ctn"
+    >
+        <div
+                        x-show="isWindowVisible"
+            x-transition:enter="fi-transition-enter"
+            x-transition:leave="fi-transition-leave"
+                                                    wire:key="modal.curator-panel.window"
+                        class="fi-modal-window fi-modal-window-has-close-btn fi-modal-window-has-content fi-modal-window-has-icon fi-align-start fi-width-screen"
+        >
+                            <div
+                                            wire:key="modal.curator-panel.header"
+                                        class="fi-modal-header fi-vertical-align-center"
+                >
+                                            <button
+                class="fi-icon-btn fi-size-md fi-modal-close-btn" title="إغلاق" aria-label="إغلاق" type="button" wire:loading.attr="disabled" tabindex="-1" x-on:click="$dispatch(&#039;close-modal&#039;, { id: &#039;curator-panel&#039; })"
+>
+    <svg class="fi-icon fi-size-lg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+</svg>
+
+    
+    </button>
+                    
+                                                                        <div class="fi-modal-icon-ctn">
+                                <div
+                                    class="fi-modal-icon-bg fi-color fi-color-info"
+                                >
+                                    <svg class="fi-icon fi-size-lg" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M576 32H256c-17.7 0-32 14.3-32 32V233.4L297.4 160c12.5-12.5 32.8-12.5 45.3 0L384 201.4 489.4 96c12.5-12.5 32.8-12.5 45.3 0L608 169.4V64c0-17.7-14.3-32-32-32zm64 176c0 0 0 0 0 .1v80c0 35.3-28.7 64-64 64H272c0 0 0 0 0 0H256c-35.3 0-64-28.7-64-64V272s0 0 0 0V64c0-35.3 28.7-64 64-64H576c35.3 0 64 28.7 64 64V208zm-32 6.7l-96-96L395.3 235.3 310.6 320H576c17.7 0 32-14.3 32-32V214.6zM265.4 320l96-96L320 182.6l-96 96V288c0 17.7 14.3 32 32 32h9.4zM296 80a24 24 0 1 1 0 48 24 24 0 1 1 0-48zM128 160h32v32H128v80V400v80H384V384h32v96h32c17.7 0 32-14.3 32-32V384h32v64c0 35.3-28.7 64-64 64H416 400 384 128 112 96 64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64H96h16 16zM32 256H96V192H64c-17.7 0-32 14.3-32 32v32zm0 160v32c0 17.7 14.3 32 32 32H96V416H32zm64-32V288H32v96H96z"/></svg>
+                                </div>
+                            </div>
+                        
+                        <div>
+                            <h2 class="fi-modal-heading">
+                                اختيار وسائط
+                            </h2>
+
+                                                    </div>
+                                    </div>
+            
+                            <div
+                                            wire:key="modal.curator-panel.content"
+                                        class="fi-modal-content"
+                >
+                    <div wire:key="lw-526709074-0-login-nafath-9" wire:snapshot="{&quot;data&quot;:{&quot;acceptedFileTypes&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;context&quot;:&quot;create&quot;,&quot;data&quot;:[{&quot;files_to_add&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;name&quot;:null,&quot;alt&quot;:null,&quot;title&quot;:null,&quot;caption&quot;:null,&quot;description&quot;:null},{&quot;s&quot;:&quot;arr&quot;}],&quot;directory&quot;:&quot;media&quot;,&quot;diskName&quot;:&quot;public&quot;,&quot;files&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;imageCropAspectRatio&quot;:null,&quot;imageResizeMode&quot;:null,&quot;imageResizeTargetWidth&quot;:null,&quot;imageResizeTargetHeight&quot;:null,&quot;isLimitedToDirectory&quot;:false,&quot;isMultiple&quot;:false,&quot;maxItems&quot;:null,&quot;maxSize&quot;:null,&quot;maxWidth&quot;:null,&quot;minSize&quot;:null,&quot;mediaId&quot;:null,&quot;search&quot;:&quot;&quot;,&quot;selected&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;defaultLimit&quot;:25,&quot;modalId&quot;:null,&quot;statePath&quot;:null,&quot;shouldPreserveFilenames&quot;:false,&quot;types&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;validationRules&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;visibility&quot;:&quot;public&quot;,&quot;extCode&quot;:null,&quot;originalFilenames&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;currentPage&quot;:0,&quot;mediaCount&quot;:0,&quot;lastPage&quot;:0,&quot;defaultSort&quot;:&quot;desc&quot;,&quot;mediaClass&quot;:[[],{&quot;class&quot;:&quot;App\\Models\\Core\\Media&quot;,&quot;connection&quot;:null,&quot;s&quot;:&quot;elmdl&quot;}],&quot;mountedActions&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;defaultAction&quot;:null,&quot;defaultActionArguments&quot;:null,&quot;defaultActionContext&quot;:null,&quot;defaultTableAction&quot;:null,&quot;defaultTableActionRecord&quot;:null,&quot;defaultTableActionArguments&quot;:null,&quot;componentFileAttachments&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;areSchemaStateUpdateHooksDisabledForTesting&quot;:false,&quot;discoveredSchemaNames&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;paginators&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;XKR08Zr9TJdmc3QwW8eR&quot;,&quot;name&quot;:&quot;Media.curator-panel&quot;,&quot;path&quot;:&quot;App\/Admission&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;ar&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;4838b8b0dacb8a8c1a95b0423ef7bf48c851c3c1549ecd6c20d0b6facd757c5e&quot;}" wire:effects="{&quot;partials&quot;:[],&quot;url&quot;:{&quot;defaultAction&quot;:{&quot;as&quot;:&quot;action&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionArguments&quot;:{&quot;as&quot;:&quot;actionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultActionContext&quot;:{&quot;as&quot;:&quot;actionContext&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableAction&quot;:{&quot;as&quot;:&quot;tableAction&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionRecord&quot;:{&quot;as&quot;:&quot;tableActionRecord&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null},&quot;defaultTableActionArguments&quot;:{&quot;as&quot;:&quot;tableActionArguments&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null}},&quot;listeners&quot;:[&quot;open-modal&quot;]}" wire:id="XKR08Zr9TJdmc3QwW8eR" wire:name="Media.curator-panel"
+    x-data="{
+        handleItemClick: function (mediaId = null, event) {
+            if (! mediaId) return;
+
+            if ($wire.selected.length === 1 && $wire.selected[0].id != mediaId) {
+                $wire.removeFromSelection($wire.selected[0].id);
+                $wire.addToSelection(mediaId);
+                return;
+            }
+
+            if ($wire.selected.length === 1 && $wire.selected[0].id == mediaId) {
+                $wire.removeFromSelection($wire.selected[0].id);
+                return;
+            }
+
+            $wire.addToSelection(mediaId);
+        },
+        isSelected: function (mediaId = null) {
+            if ($wire.selected.length === 0) return false;
+
+            return Object.values($wire.selected).find(obj => obj.id == mediaId) !== undefined;
+        },
+    }"
+>
+    <div data-curator-panel class="flex flex-col lg:flex-row">
+
+        <!-- Gallery -->
+        <div class="flex-1 p-4">
+            <div class="gap-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
+                <!--[if BLOCK]><![endif]-->                    <div class="col-span-3 sm:col-span-4 md:col-span-6 lg:col-span-8">
+                        لا توجد ملفات في المكتبة أو لم يتم العثور على أي شئ لبحثك.
+                    </div>
+                <!--[if ENDBLOCK]><![endif]-->
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <!-- End Gallery -->
+
+        <!-- Sidebar -->
+        <div class="w-full lg:h-full lg:max-w-xs bg-gray-100 dark:bg-gray-900/30 flex flex-col shadow-top lg:shadow-none z-[1]">
+            <div class="flex-1">
+                <div class="flex flex-col h-full">
+                    <h4 class="font-bold py-2 px-4 mb-0">
+                        <span>
+                            إضافة ملفات
+                        </span>
+                    </h4>
+
+                    <div class="flex-1  px-4 pb-4">
+                        <div class="h-full">
+                            <div class="mb-4 mt-px">
+                                
+        <div class="fi-sc  fi-sc-has-gap fi-grid" style="--cols-default: repeat(1, minmax(0, 1fr));" x-data="filamentSchema({ livewireId: 'XKR08Zr9TJdmc3QwW8eR' })" x-on:form-validation-error.window="handleFormValidationError">
+                                                
+        <div
+                            wire:partial="schema-component::form.files_to_add"
+                          

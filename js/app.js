@@ -55,11 +55,15 @@
     }
   }
 
+  const GPA_SCALE = (R.meta && R.meta.gpaScale) || 5;
+
   const state = {
     step: 0,
     name: "",
     email: "",
     trackId: null,
+    /** معدل ثانوي تراكمي (من 5) — إلزامي قبل النتائج */
+    userGpa: null,
     answers: {},
     leadSaved: false,
     /** منع تكرار إرسال نفس النتيجة إلى Supabase عند إعادة فتح خطوة النتائج. */
@@ -608,6 +612,7 @@
           name: state.name,
           email: state.email,
           trackId: state.trackId,
+          userGpa: state.userGpa,
           answers: state.answers,
           leadSaved: state.leadSaved,
           remoteResultSent: state.remoteResultSent,
@@ -636,6 +641,7 @@
       state.name = typeof o.name === "string" ? o.name : "";
       state.email = typeof o.email === "string" ? o.email : "";
       state.trackId = o.trackId || null;
+      state.userGpa = typeof o.userGpa === "number" && !Number.isNaN(o.userGpa) ? o.userGpa : null;
       state.answers = o.answers || {};
       state.leadSaved = !!o.leadSaved;
       state.remoteResultSent = !!o.remoteResultSent;
@@ -660,6 +666,7 @@
     state.name = "";
     state.email = "";
     state.trackId = null;
+    state.userGpa = null;
     state.answers = {};
     state.leadSaved = false;
     state.remoteResultSent = false;
@@ -690,12 +697,72 @@
 
   /** يقرأ الإجابات من الواجهة (مهم بعد تحديث الصفحة عندما يبقى الراديو ظاهراً محدداً دون أحداث change). */
   function syncAnswersFromDOM() {
+    syncGpaFromDOM();
     const root = el("questions");
     if (!root) return;
     R.questions.forEach((q) => {
       const checked = root.querySelector('input[type="radio"][name="' + q.id + '"]:checked');
       if (checked && checked.value) state.answers[q.id] = checked.value;
     });
+  }
+
+  function parseUserGpaInput(raw) {
+    if (raw === null || raw === undefined) return null;
+    const s = String(raw).trim().replace(",", ".");
+    if (!s) return null;
+    const v = parseFloat(s);
+    if (Number.isNaN(v) || v < 0 || v > GPA_SCALE) return null;
+    return Math.round(v * 100) / 100;
+  }
+
+  function getUserGpa() {
+    return typeof state.userGpa === "number" && !Number.isNaN(state.userGpa) ? state.userGpa : null;
+  }
+
+  function syncGpaFromDOM() {
+    const inp = el("inp-gpa");
+    if (!inp) return;
+    state.userGpa = parseUserGpaInput(inp.value);
+  }
+
+  function weightedCategoryLabel(cat) {
+    if (cat === "SCIENTIFIC") {
+      return "مفاضلة علمية: 40% ثانوي + 30% قدرات + 30% تحصيلي (مرجع uqu.edu.sa/App/Admission)";
+    }
+    if (cat === "ADMIN_THEORY") {
+      return "مفاضلة إدارية/نظرية: 50% ثانوي + 30% قدرات + 20% تحصيلي (مرجع uqu.edu.sa/App/Admission)";
+    }
+    return "";
+  }
+
+  /** مقارنة معدل المستخدم بحد البرنامج المرجعي (من 5). */
+  function gpaAdmissionStatus(major, userGpa) {
+    const min = typeof major.minGpa === "number" ? major.minGpa : null;
+    if (userGpa === null || min === null) {
+      return { met: true, min, gap: 0, label: "—" };
+    }
+    const gap = userGpa - min;
+    if (gap >= 0) {
+      return {
+        met: true,
+        min,
+        gap,
+        label: "مستوفٍ للحد المرجعي (" + min + " من " + GPA_SCALE + ")",
+      };
+    }
+    return {
+      met: false,
+      min,
+      gap,
+      label: "أقل من الحد المرجعي بـ " + Math.abs(gap).toFixed(2) + " (المطلوب " + min + " من " + GPA_SCALE + ")",
+    };
+  }
+
+  function gpaScoreAdjustment(major, userGpa) {
+    const st = gpaAdmissionStatus(major, userGpa);
+    if (st.met || st.min === null || userGpa === null) return 0;
+    const gap = st.min - userGpa;
+    return Math.min(45, Math.round(gap * 22));
   }
 
   /** يطبّق state.answers على عناصر الراديو بعد إعادة الرسم. */
@@ -971,6 +1038,12 @@
       base -= 4;
     }
 
+    const userGpa = getUserGpa();
+    base -= gpaScoreAdjustment(major, userGpa);
+    if (userGpa !== null && typeof major.minGpa === "number" && userGpa < major.minGpa) {
+      base *= Math.max(0.4, 1 - (major.minGpa - userGpa) * 0.35);
+    }
+
     return Math.max(0, Math.min(100, Math.round(base)));
   }
 
@@ -1049,9 +1122,46 @@
     });
   }
 
+  function renderGpaBlock() {
+    const box = el("questions");
+    if (!box) return;
+    let block = el("gpa-block");
+    if (!block) {
+      block = document.createElement("div");
+      block.id = "gpa-block";
+      block.className = "gpa-block q-block";
+      box.insertBefore(block, box.firstChild);
+    }
+    const saved = getUserGpa();
+    block.innerHTML =
+      "<p class=\"q-title\"><span class=\"q-num\">★</span>المعدل التراكمي للثانوية العامة (من " +
+      GPA_SCALE +
+      ")</p>" +
+      "<p class=\"q-hint\">يُقارَن مع الحد المرجعي لكل تخصص من شروط قبول أم القرى؛ القبول النهائي عبر بوابة تميّز (قدرات + تحصيلي + مفاضلة).</p>" +
+      "<label class=\"field gpa-field\"><span>أدخل معدلك</span>" +
+      "<input id=\"inp-gpa\" type=\"number\" inputmode=\"decimal\" min=\"0\" max=\"" +
+      GPA_SCALE +
+      "\" step=\"0.01\" placeholder=\"مثال: 4.25\" autocomplete=\"off\" value=\"" +
+      (saved !== null ? String(saved) : "") +
+      "\" /></label>";
+    const inp = el("inp-gpa");
+    if (inp && !inp.dataset.bound) {
+      inp.dataset.bound = "1";
+      inp.addEventListener("input", () => {
+        state.userGpa = parseUserGpaInput(inp.value);
+        persistSession();
+      });
+      inp.addEventListener("change", () => {
+        state.userGpa = parseUserGpaInput(inp.value);
+        persistSession();
+      });
+    }
+  }
+
   function renderQuestions() {
     const box = el("questions");
     box.innerHTML = "";
+    renderGpaBlock();
     const list = getQuestionsInOrder();
     list.forEach((q, idx) => {
       const wrap = document.createElement("div");
@@ -1180,6 +1290,7 @@
     state.name = nameTr;
     state.email = emailTr;
     state.trackId = null;
+    state.userGpa = null;
     state.answers = {};
     state.leadSaved = false;
     state.remoteResultSent = false;
@@ -1219,6 +1330,15 @@
       stemEl.textContent = "طبيعة مسارك بحسب اختيارك: " + line + ".";
     }
     el("res-level").textContent = "المستوى التقديري (1–5): " + s.userTier + " — " + levelLabel(s);
+    const userGpa = getUserGpa();
+    const resGpa = el("res-gpa");
+    if (resGpa) {
+      resGpa.textContent =
+        userGpa !== null
+          ? "معدلك المُدخل: " + userGpa + " من " + GPA_SCALE + " — يُعرض لكل تخصص مقابل الحد المرجعي لقبول أم القرى."
+          : "";
+      resGpa.classList.toggle("hidden", userGpa === null);
+    }
     const confEl = el("res-confidence");
     if (confEl) {
       confEl.textContent =
@@ -1247,6 +1367,41 @@
         "<p class=\"fit\"><span>نسبة الملاءمة التقديرية</span><strong>" +
         t.pct +
         "%</strong></p>" +
+        (function () {
+          const gst = gpaAdmissionStatus(t.major, userGpa);
+          const wLabel = weightedCategoryLabel(t.major.weightedCategory);
+          let html =
+            "<p class=\"gpa-major-line " +
+            (gst.met ? "gpa-ok" : "gpa-warn") +
+            "\"><strong>المعدل:</strong> ";
+          if (userGpa !== null && gst.min !== null) {
+            html +=
+              "معدلك " +
+              userGpa +
+              " — الحد المرجعي " +
+              gst.min +
+              " من " +
+              GPA_SCALE +
+              " — <span>" +
+              gst.label +
+              "</span>";
+          } else if (userGpa !== null) {
+            html += "معدلك " + userGpa + " من " + GPA_SCALE;
+          } else {
+            html += "لم يُدخل معدل";
+          }
+          html += "</p>";
+          if (t.major.uquAdmissionNote) {
+            html +=
+              "<p class=\"muted small\">شروط القبول (مرجع الجامعة): " +
+              t.major.uquAdmissionNote +
+              "</p>";
+          }
+          if (wLabel) {
+            html += "<p class=\"muted tiny\">" + wLabel + "</p>";
+          }
+          return html;
+        })() +
         "<p class=\"muted small\">" +
         (t.major.hoursNote || "") +
         "</p>" +
@@ -1354,6 +1509,15 @@
 
   el("btn-survey-submit").addEventListener("click", () => {
     syncAnswersFromDOM();
+    const gpa = getUserGpa();
+    if (gpa === null) {
+      alert("يرجى إدخال معدلك التراكمي للثانوية (من " + GPA_SCALE + ") في أعلى الاستبيان.");
+      const gpaBlock = el("gpa-block");
+      if (gpaBlock) gpaBlock.scrollIntoView({ behavior: "smooth", block: "center" });
+      const inp = el("inp-gpa");
+      if (inp) inp.focus();
+      return;
+    }
     const visible = getQuestionsInOrder();
     const missing = visible.filter((q) => !state.answers[q.id]);
     if (missing.length) {

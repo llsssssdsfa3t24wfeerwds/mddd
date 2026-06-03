@@ -49,8 +49,17 @@
 ### التخصصات (`majors`)
 
 - `tracks[]`, `streams[]`, `fitProfile`, `stemOnly`, `difficulty`, `salarySarMonthly`, `sampleCourses`
+- `minGpa` (من 5), `weightedCategory` (`SCIENTIFIC` | `ADMIN_THEORY`), `uquAdmissionNote` — من `data/uqu-major-admission.json` + نص تبويب شروط القبول في صفحة البرنامج (`scripts/scrape-uqu-admission-gpa.mjs` + `merge-admission-to-registry.mjs`).
 
 مصدر الأسماء: محاذاة مع `https://uqu.edu.sa/App/Degrees`.
+
+### المعدل التراكمي (`userGpa`)
+
+- حقل رقمي في خطوة الاستبيان (`#inp-gpa`)، مقياس `meta.gpaScale` (5).
+- **ليس** سؤال `QN_GRADES` (ذاك انطباعي عن الأداء).
+- `gpaAdmissionStatus(major, userGpa)` يقارن بـ `major.minGpa`؛ يُعرض في كل بطاقة نتيجة.
+- `majorScore`: عقوبة إذا المعدل أقل من الحد المرجعي (`gpaScoreAdjustment` + مضاعف).
+- أوزان المفاضلة الرسمية (مرجع `uqu.edu.sa/App/Admission`): علمي 40/30/30؛ إداري/نظري 50/30/20 — التطبيق لا يحسب قدرات/تحصيلي، فقط مكوّن الثانوي.
 
 ### ربط أم القرى (`uquDegreeId` / `uquUrl` / `uquProgramTitle`)
 
@@ -75,6 +84,7 @@
 3. **`interestFit`** — عقوبات اهتمام (`want_shar`, `want_health`, …) تُطبَّق فقط إن وُجد سؤال المحور في الإجابات.
 4. **نسبة الملاءمة التقديرية** = النتيجة المطلقة 0–100% (ليست نسبية للمركز الأول).
 5. **`normalizeScores` / `userTier`:** المحاور المخفية (`hideForTrackNature`) لا تدخل في `cognitive` ولا في أوزان الملاءمة؛ لا قيم افتراضية مصطنعة لعلوم/برمجة في المسارات الأدبية.
+6. **`gpaScoreAdjustment` + مضاعف المعدل:** إذا `userGpa < major.minGpa` تُخفض الملاءمة؛ الحدود في السجل مرجعية (الجامعة لا تنشر رقماً ثابتاً لكل برنامج على صفحة الدرجة).
 
 ### تطابق الاهتمام (`interestFit`)
 

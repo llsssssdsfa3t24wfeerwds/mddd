@@ -91,8 +91,9 @@
       <section id="panel-survey" class="panel card hidden">
         <h2>3 — قياس المستوى والميول</h2>
         <p class="lead">
-          أجب بصدق؛ النتيجة تقترح أفضل ثلاثة تخصصات من برامج البكالوريوس في أم القرى مع تقدير راتب سوقي
-          <strong>غير ملزم</strong>. تتغيّر الأسئلة والاقتراحات بحسب مسار الثانوي الذي اخترته.
+          أدخل <strong>معدلك التراكمي للثانوية (من 5)</strong> ثم أجب بصدق؛ النتيجة تقترح أفضل ثلاثة تخصصات من برامج
+          البكالوريوس في أم القرى مع مقارنة اشتراط المعدل المرجعي لكل برنامج وتقدير راتب سوقي
+          <strong>غير ملزم</strong>.
         </p>
         <div id="questions"></div>
         <button type="button" id="btn-survey-submit" class="btn primary wide">عرض النتائج</button>
@@ -105,6 +106,7 @@
           <p><strong>مسار الثانوي:</strong> <span id="res-track"></span></p>
           <p id="res-stem" class="muted small"></p>
           <p id="res-level" class="level-line"></p>
+          <p id="res-gpa" class="gpa-summary-line"></p>
         </div>
         <div id="res-majors" class="major-list"></div>
         <section id="res-global-stats" class="global-stats hidden" aria-label="إحصائية شائع التخصصات"></section>

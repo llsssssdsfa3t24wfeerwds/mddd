@@ -1,0 +1,122 @@
+{
+  "_meta": {
+    "source": "uqu.edu.sa/App/Degrees (تبويب شروط القبول) + uqu.edu.sa/App/Admission (أوزان المفاضلة)",
+    "gpaScale": 5,
+    "note": "لا تنشر الجامعة حداً رقمياً ثابتاً لكل برنامج على صفحة الدرجة؛ minGpa مرجع قبولي (من 5) يُقارن بمعدل المستخدم. القبول الفعلي عبر تميّز بالنسبة الموزونة (قدرات + تحصيلي)."
+  },
+  "MAJ_MED": {
+    "minGpa": 4.85,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "كليات طبية — ثانوية حديثة (سنتان كحد أقصى للتخرج) + قياس + كفايات إنجليزي"
+  },
+  "MAJ_DEN": {
+    "minGpa": 4.8,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "كليات طبية — نفس اشتراطات القبول الصحي العامة"
+  },
+  "MAJ_PHR": {
+    "minGpa": 4.5,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "خريج ثانوي علمي + ثانوية 5 سنوات فأقل"
+  },
+  "MAJ_NUR": {
+    "minGpa": 3.75,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "برنامج صحي — مسار علمي"
+  },
+  "MAJ_MLS": {
+    "minGpa": 3.65,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "علوم طبية تطبيقية — مسار علمي"
+  },
+  "MAJ_PHE": {
+    "minGpa": 3.25,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "صحة عامة / وبائيات — مسار علمي"
+  },
+  "MAJ_CIV": {
+    "minGpa": 3.75,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "خريج ثانوي علمي + ثانوية 5 سنوات فأقل"
+  },
+  "MAJ_ELE": {
+    "minGpa": 3.8,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "هندسة — مسار علمي"
+  },
+  "MAJ_MECH": {
+    "minGpa": 3.75,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "هندسة — مسار علمي"
+  },
+  "MAJ_ARC": {
+    "minGpa": 3.5,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "هندسة معمارية — مسار علمي"
+  },
+  "MAJ_CS": {
+    "minGpa": 4.0,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "حاسب — مسار علمي؛ مفاضلة علمية 40% ثانوي + 30% قدرات + 30% تحصيلي"
+  },
+  "MAJ_IS": {
+    "minGpa": 3.85,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "هندسة برمجيات — مسار علمي"
+  },
+  "MAJ_BUS": {
+    "minGpa": 2.75,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خريج ثانوي علمي أو إداري — ثانوية 5 سنوات فأقل؛ مفاضلة 50% ثانوي + 30% قدرات + 20% تحصيلي"
+  },
+  "MAJ_ACC": {
+    "minGpa": 3.0,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خريج ثانوي علمي-إداري — 5 سنوات فأقل"
+  },
+  "MAJ_ECO": {
+    "minGpa": 3.0,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خريج ثانوي علمي-إداري — 5 سنوات فأقل"
+  },
+  "MAJ_LAW": {
+    "minGpa": 3.5,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خريج ثانوي علمي أو أدبي أو إداري — 5 سنوات فأقل"
+  },
+  "MAJ_SHR": {
+    "minGpa": 2.75,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خريج ثانوي (علمي/شرعي/أدبي/إداري) — 5 سنوات فأقل"
+  },
+  "MAJ_USL": {
+    "minGpa": 2.75,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "دراسات إسلامية — مسارات أدبية وشرعية"
+  },
+  "MAJ_ARB": {
+    "minGpa": 2.5,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خريج ثانوي (علمي/شرعي/أدبي/إداري) — 5 سنوات فأقل"
+  },
+  "MAJ_EDU": {
+    "minGpa": 2.5,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "تربية — مسارات متعددة"
+  },
+  "MAJ_SCI": {
+    "minGpa": 3.25,
+    "weightedCategory": "SCIENTIFIC",
+    "uquAdmissionNote": "علوم — مسار علمي"
+  },
+  "MAJ_SOC": {
+    "minGpa": 2.5,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "خدمة اجتماعية — مسارات أدبية"
+  },
+  "MAJ_DES": {
+    "minGpa": 3.0,
+    "weightedCategory": "ADMIN_THEORY",
+    "uquAdmissionNote": "تصميم — مسار علمي أو عام"
+  }
+}

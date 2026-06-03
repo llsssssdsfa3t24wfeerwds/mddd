@@ -10,6 +10,9 @@ window.UQU_REGISTRY = {
     universityUrl: "https://uqu.edu.sa/App/Degrees",
     dataNote:
       "التخصصات مبنية على كليات وبرامج بكالوريوس معروضة في بوابة «برامج الجامعة» لأم القرى؛ ساعات/مواد توضيحية نموذجية. الرواتب تقدير سوقي وليست من الجامعة.",
+    gpaAdmissionNote:
+      "minGpa (من 5) مرجعي من فئة البرنامج وشروط uqu.edu.sa؛ القبول الفعلي عبر تميّز بالنسبة الموزونة (ثانوي + قدرات + تحصيلي).",
+    gpaScale: 5,
     trackNatureNote:
       "تصنيف المسار في النموذج مبني على طبيعة المسارات المعروفة لنظام الثانوي (تميّز إداري/لغوي مقابل علوم وهندسة وصحة). المسار العام يُعامل كمختلط: أسئلة كاملة ولا يُستبعد stemOnly. القبول الجامعي الفعلي يختلف؛ راجع الجهات الرسمية.",
     /**
@@ -788,6 +791,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "44",
       uquUrl: "https://uqu.edu.sa/App/Degrees/44",
       uquProgramTitle: "الطب والجراحة",
+      minGpa: 4.85,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "كليات طبية — ثانوية حديثة (سنتان كحد أقصى للتخرج) + قياس + كفايات إنجليزي",
       hoursNote: "ساعات عالية جداً؛ تدريب سريري لاحق (مرجع الجامعة لخطة البرنامج).",
       sampleCourses: [
         "اساسيات الكيمياء الحيوية الطبية 1",
@@ -812,6 +818,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "653",
       uquUrl: "https://uqu.edu.sa/App/Degrees/653",
       uquProgramTitle: "طب وجراحة الفم والأسنان",
+      minGpa: 4.8,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "كليات طبية — نفس اشتراطات القبول الصحي العامة",
       hoursNote: "ساعات سريرية ومخبرية مكثفة.",
       sampleCourses: [
         "الكيمياء لطب الأسنان",
@@ -836,6 +845,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1739",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1739",
       uquProgramTitle: "دكتور صيدلي",
+      minGpa: 4.5,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "خريج ثانوي علمي+ خريج ثانوية سنتين فأقل.",
       sampleCourses: [
         "الكيمياء العضوية الصيدلانية 1",
         "فيزياء في الصيدلة",
@@ -859,6 +871,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "847",
       uquUrl: "https://uqu.edu.sa/App/Degrees/847",
       uquProgramTitle: "التمريض",
+      minGpa: 3.75,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "برنامج صحي — مسار علمي",
       sampleCourses: [
         "مصطلحات طبية",
         "الكيمياء الحيوية التطبيقية",
@@ -882,6 +897,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "485",
       uquUrl: "https://uqu.edu.sa/App/Degrees/485",
       uquProgramTitle: "طب المختبرات",
+      minGpa: 3.65,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "علوم طبية تطبيقية — مسار علمي",
       sampleCourses: [
         "المهارات الأساسية في العلوم الطبية التطبيقية",
         "كيمياء عامة للتخصصات الصحية",
@@ -905,6 +923,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1074",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1074",
       uquProgramTitle: "الوبائيات",
+      minGpa: 3.25,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "صحة عامة / وبائيات — مسار علمي",
       sampleCourses: [
         "الكيمياء في العلوم الصحية",
         "أحياء الصحة العامة",
@@ -928,6 +949,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "6",
       uquUrl: "https://uqu.edu.sa/App/Degrees/6",
       uquProgramTitle: "الهندسة المدنية",
+      minGpa: 3.75,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "خريج ثانوي علمي + ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "التفاضل والتكامل للهندسة (1)",
         "مقدمة إلى الهندسة",
@@ -951,6 +975,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "831",
       uquUrl: "https://uqu.edu.sa/App/Degrees/831",
       uquProgramTitle: "الهندسة الكهربائية (القوى الكهربائية)",
+      minGpa: 3.8,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "هندسة — مسار علمي",
       sampleCourses: [
         "التفاضل والتكامل للهندسة (1)",
         "مقدمة إلى الهندسة",
@@ -974,6 +1001,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1485",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1485",
       uquProgramTitle: "الهندسة الميكانيكية (إنتاج)",
+      minGpa: 3.75,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "هندسة — مسار علمي",
       sampleCourses: [
         "التفاضل والتكامل للهندسة (1)",
         "مقدمة إلى الهندسة",
@@ -997,6 +1027,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1481",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1481",
       uquProgramTitle: "العمارة والتخطيط",
+      minGpa: 3.5,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "خريج ثانوي علمي+ خريج ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "استوديو مبادئ التشكيل المعماري",
         "الرسم المعماري",
@@ -1020,6 +1053,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "478",
       uquUrl: "https://uqu.edu.sa/App/Degrees/478",
       uquProgramTitle: "علوم الحاسب الآلي",
+      minGpa: 4,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "خريج ثانوي علمي+ خريج ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "التفاضل والتكامل 1",
         "برمجة الحاسب بلغة جافا",
@@ -1043,6 +1079,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1510",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1510",
       uquProgramTitle: "هندسة البرمجيات",
+      minGpa: 3.85,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "خريج ثانوي علمي+ خريج ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "تنظيم الحاسوب والمنطق الرقمي",
         "الفيزياء العامة",
@@ -1066,6 +1105,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "769",
       uquUrl: "https://uqu.edu.sa/App/Degrees/769",
       uquProgramTitle: "إدارة الأعمال",
+      minGpa: 2.75,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي - اداري- خريج ثانوي 5 سنوات واقل",
       hoursNote: "عرض الجامعة لبرامج بساعات مختلفة حسب المسار؛ راجع صفحة البرنامج.",
       sampleCourses: [
         "مبادئ الإدارة",
@@ -1090,6 +1132,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1152",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1152",
       uquProgramTitle: "المحاسبة",
+      minGpa: 3,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي- إداري+ خريج ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "محاسبة مالية 1",
         "مبادئ التمويل",
@@ -1113,6 +1158,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1724",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1724",
       uquProgramTitle: "الاقتصاد",
+      minGpa: 3,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي-اداري-خريج ثانوي 5 سنوات واقل",
       sampleCourses: [
         "الرياضيات للاقتصاديين",
         "مبادىء الاقتصاد",
@@ -1136,6 +1184,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "816",
       uquUrl: "https://uqu.edu.sa/App/Degrees/816",
       uquProgramTitle: "الدراسات القضائية",
+      minGpa: 3.5,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي – أدبي – إداري – خريج ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "عقيدة1",
         "التحرير العربي",
@@ -1159,6 +1210,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "18",
       uquUrl: "https://uqu.edu.sa/App/Degrees/18",
       uquProgramTitle: "الشريعة",
+      minGpa: 2.75,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي-شرعي-ادبي-اداري-خريج ثانوي 5 سنوات واقل",
       sampleCourses: [
         "المقدمات الأصولية",
         "المدخل إلى دراسة الفقه",
@@ -1182,6 +1236,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "26",
       uquUrl: "https://uqu.edu.sa/App/Degrees/26",
       uquProgramTitle: "الكتاب والسنة",
+      minGpa: 2.75,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي-شرعي-ادبي-اداري-خريج ثانوي 5 سنوات واقل",
       sampleCourses: [
         "مدخل إلى دراسة الدعوة",
         "عقيدة1",
@@ -1205,6 +1262,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "24",
       uquUrl: "https://uqu.edu.sa/App/Degrees/24",
       uquProgramTitle: "الأدب",
+      minGpa: 2.5,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي-شرعي-ادبي-اداري-خريج ثانوي 5 سنوات واقل",
       sampleCourses: [
         "علم المعاني (1)",
         "الصرف (1)",
@@ -1228,6 +1288,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1744",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1744",
       uquProgramTitle: "الطفولة المبكرة",
+      minGpa: 2.5,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي، شرعي، ادبي، اداري +خريج ثانوية 5 سنوات فأقل",
       sampleCourses: [
         "مدخل الى الطفولة المبكرة",
         "الطفل في مرحلة الحضانة",
@@ -1251,6 +1314,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1495",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1495",
       uquProgramTitle: "الرياضيات",
+      minGpa: 3.25,
+      weightedCategory: "SCIENTIFIC",
+      uquAdmissionNote: "خريج ثانوية علمي +التخرج من الثانوية 5 سنوات واقل",
       sampleCourses: [
         "الاحياء العامة",
         "مقدمة للتفاضل والتكامل",
@@ -1274,6 +1340,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1",
       uquProgramTitle: "الخدمة الاجتماعية",
+      minGpa: 2.5,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي-شرعي-ادبي-اداري-خريج ثانوي 5 سنوات واقل",
       sampleCourses: [
         "جغرافية المملكة العربية السعودية",
         "الرعاية الاجتماعية",
@@ -1297,6 +1366,9 @@ window.UQU_REGISTRY = {
       uquDegreeId: "1143",
       uquUrl: "https://uqu.edu.sa/App/Degrees/1143",
       uquProgramTitle: "التصميم الداخلي",
+      minGpa: 3,
+      weightedCategory: "ADMIN_THEORY",
+      uquAdmissionNote: "خريج ثانوي علمي-شرعي-ادبي-اداري-خريج ثانوي 5 سنوات واقل",
       sampleCourses: [
         "الرسم",
         "رسم واسقاط هندسي",
